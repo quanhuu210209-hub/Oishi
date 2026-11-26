@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="imgs/favicon.svg">
+  <link rel="icon" type="image/png" sizes="64x64" href="imgs/favicon.png">
+  <link rel="apple-touch-icon" href="imgs/favicon.png">
+  <title>Oishi World Store — Thế giới bánh snack Oishi</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'oishi-red': '#C8102E',
+            'oishi-red-deep': '#9E001F',
+            'oishi-orange': '#C2410C',
+            'oishi-choco': '#4A1F0E',
+            'oishi-kraft': '#EBC8A4',
+            'oishi-kraft-light': '#F6E3CE',
+            'oishi-cream': '#FFF9F2',
+            'oishi-footer': '#1E1A18',
+            'oishi-gold': '#F59E0B',
+            'oishi-success': '#15803D',
+            'oishi-border': '#DEC0A1',
+            'oishi-muted': '#6E4C3D',
+            'oishi-pink': '#ff6f91',
+          },
+          fontFamily: {
+            'display': ['"Baloo 2"', '"Comic Sans MS"', 'cursive'],
+            'headline': ['"Baloo 2"', '"Comic Sans MS"', 'cursive'],
+            'title': ['"Baloo 2"', '"Comic Sans MS"', 'cursive'],
+            'body': ['"Nunito"', 'sans-serif'],
+            'label': ['"Nunito"', 'sans-serif'],
+            'mono': ['"Source Code Pro"', 'monospace'],
+          },
+          fontSize: {
+            'display-lg': ['46px', { lineHeight: '54px', fontWeight: '800' }],
+            'display-lg-mobile': ['32px', { lineHeight: '38px', fontWeight: '800' }],
+            'headline-lg': ['36px', { lineHeight: '44px', fontWeight: '800' }],
+            'headline-lg-mobile': ['26px', { lineHeight: '32px', fontWeight: '800' }],
+            'headline-md': ['24px', { lineHeight: '32px', fontWeight: '700' }],
+            'title-lg': ['20px', { lineHeight: '28px', fontWeight: '700' }],
+            'title-md': ['16px', { lineHeight: '24px', fontWeight: '700' }],
+            'body-lg': ['16px', { lineHeight: '24px', fontWeight: '600' }],
+            'body-md': ['14px', { lineHeight: '20px', fontWeight: '600' }],
+            'label-lg': ['14px', { lineHeight: '20px', fontWeight: '700' }],
+            'label-sm': ['12px', { lineHeight: '16px', fontWeight: '700' }],
+            'mono-sm': ['13px', { lineHeight: '18px', fontWeight: '600' }],
+          },
+          borderRadius: {
+            'sm': '8px', 'DEFAULT': '12px', 'md': '16px', 'lg': '24px', 'xl': '32px', 'full': '9999px',
+          },
+          spacing: {
+            'gutter-xs': '4px', 'gutter-sm': '8px', 'gutter-md': '16px', 'gutter-lg': '24px',
+            'gutter-xl': '32px', 'section': '48px', 'page-margin': '24px',
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined {
+      display: inline-block; width: 1em; height: 1em; line-height: 1 !important;
+      box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle;
+    }
+    html { scroll-behavior: smooth; }
+
+    /* Nền bầu trời hoạt hình vui tươi */
+    body {
+      background: linear-gradient(180deg, #9fd8ff 0%, #d9f0ff 100%) fixed;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #paper {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; opacity: .22; mix-blend-mode: multiply; z-index: 60;
+    }
+    #sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .cloud { position: absolute; transition: transform 1.6s cubic-bezier(.2,.7,.3,1), opacity 1.6s; }
+    .cloud svg { display: block; width: 100%; height: auto; overflow: visible; filter: url(#crayon); }
+    .cloud.left.pre  { transform: translateX(-130vw); }
+    .cloud.right.pre { transform: translateX(130vw); }
+    .drift { animation: drift var(--dur, 14s) ease-in-out infinite alternate; }
+    @keyframes drift { from { transform: translate(-2.5vw, 0); } to { transform: translate(2.5vw, -1.5vh); } }
+    #page { position: relative; z-index: 10; animation: fadeUp .9s ease .2s both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+    /* Chữ nhiều màu nhún nhảy */
+    .rainbow .word { display: inline-block; white-space: nowrap; }
+    .rainbow .ch {
+      display: inline-block; color: var(--c);
+      -webkit-text-stroke: .08em #fff; paint-order: stroke fill;
+      text-shadow: .05em .06em 0 rgba(0,0,0,.18);
+      animation: bounce 2s ease-in-out infinite;
+      animation-delay: calc(var(--i) * .08s);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+      50% { transform: translateY(-.1em) rotate(calc(var(--r, 0deg) * -1)); }
+    }
+
+    /* Khung nét sáp màu */
+    .panel { position: relative; background: rgba(255,249,242,.96); }
+    .panel::before {
+      content: ''; position: absolute; inset: -3px; border-radius: inherit;
+      border: 5px solid var(--accent, #7cc4f5); filter: url(#wobble); pointer-events: none;
+    }
+
+    /* Thẻ sản phẩm */
+    .product-card {
+      border: 4px solid var(--accent);
+      box-shadow: 0 8px 0 var(--accent);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-6px) rotate(-1deg);
+      box-shadow: 0 12px 0 var(--accent);
+    }
+    .product-card:nth-child(even):hover {
+      transform: translateY(-6px) rotate(1deg);
+    }
+    .img-box { background: color-mix(in srgb, var(--accent) 22%, white); }
+
+    /* Nút lọc */
+    .filter-chip {
+      padding: 8px 16px; border-radius: 9999px; background: #fff; color: #4A1F0E;
+      border: 2px solid #DEC0A1; font-family: Nunito, sans-serif; font-weight: 700; font-size: 14px;
+      transition: transform .15s, background .15s;
+    }
+    .filter-chip:hover { background: #FFF9F2; transform: scale(1.05); }
+    .filter-chip[aria-pressed="true"] {
+      background: #ff6f91; color: #fff; border-color: #fff;
+      box-shadow: 0 4px 0 rgba(0,0,0,.18);
+    }
+
+    /* Nút bấm to dễ thương */
+    .btn-cute {
+      border: 3px solid #fff; box-shadow: 0 5px 0 rgba(0,0,0,.2);
+      transition: transform .12s, box-shadow .12s, background-color .15s;
+    }
+    .btn-cute:hover { transform: scale(1.04); }
+    .btn-cute:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+
+    .sun-spin { animation: spin 40s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .scallop {
+      height: 14px; background: radial-gradient(circle at 14px 0, transparent 13px, #1E1A18 14px) repeat-x;
+      background-size: 28px 14px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rainbow .ch, .drift, .sun-spin, #page { animation: none; }
+      .cloud { transition: none; }
+    }
+  
+    /* ================= PAGE LOADER ================= */
+    #page-loader {
+      position: fixed; inset: 0; z-index: 99999;
+      background: linear-gradient(135deg, #FFF9F2 0%, #F6E3CE 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      user-select: none;
+    }
+    #page-loader.loader-hidden {
+      opacity: 0; visibility: hidden; pointer-events: none;
+    }
+    .loader-snack-pack {
+      animation: packBob 1.2s ease-in-out infinite alternate;
+      filter: drop-shadow(0 12px 18px rgba(200, 16, 46, 0.25));
+    }
+    @keyframes packBob {
+      0% { transform: translateY(0) rotate(-4deg) scale(1); }
+      100% { transform: translateY(-16px) rotate(4deg) scale(1.05); }
+    }
+    .loader-progress-bar {
+      width: 200px; height: 10px; background: #DEC0A1; border-radius: 999px;
+      overflow: hidden; position: relative; border: 2px solid #fff;
+    }
+    .loader-progress-inner {
+      height: 100%; background: linear-gradient(90deg, #ff6f91, #C8102E, #ff9f1c);
+      width: 0%; border-radius: 999px;
+      animation: loadFill 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes loadFill {
+      0% { width: 5%; }
+      60% { width: 75%; }
+      100% { width: 100%; }
+    }
+
+    /* ================= OISHI INTRO OVERLAY ================= */
+    #oishi-intro-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(180deg, #9fd8ff 0%, #d9f0ff 100%);
+      font-family: "Baloo 2", "Comic Sans MS", "Chalkboard SE", cursive;
+      cursor: pointer; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    #oishi-intro-overlay.intro-hidden {
+      display: none !important;
+    }
+    #oishi-intro-overlay.leaving #intro-center {
+      transform: scale(1.6); opacity: 0;
+    }
+    #oishi-intro-overlay.leaving .intro-cloud.left {
+      transform: translateX(-140vw);
+    }
+    #oishi-intro-overlay.leaving .intro-cloud.right {
+      transform: translateX(140vw);
+    }
+    #oishi-intro-overlay.leaving .intro-sun {
+      opacity: 0; transform: scale(0.6) rotate(180deg);
+      transition: opacity 0.8s, transform 0.8s;
+    }
+    #oishi-intro-overlay.leaving {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-sun {
+      position: absolute; top: 4vh; right: 5vw; width: min(22vw, 160px);
+      filter: url(#crayon); animation: spin 40s linear infinite;
+      transition: opacity 0.8s, transform 0.8s;
+    }
+    .intro-cloud {
+      position: absolute; filter: url(#crayon);
+      transition: transform 1.3s cubic-bezier(.6,0,.9,.4), opacity 1.3s;
+    }
+    .intro-cloud svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .intro-drift { animation: introDrift var(--dur, 14s) ease-in-out infinite alternate; }
+    @keyframes introDrift {
+      from { transform: translate(-2.5vw, 0); }
+      to { transform: translate(2.5vw, -1.5vh); }
+    }
+
+    #intro-center {
+      position: relative; z-index: 10; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 0 4vw; transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.9s ease;
+    }
+    .intro-line { display: block; white-space: nowrap; line-height: 1; }
+    .intro-l1 { font-size: clamp(24px, 5.5vw, 54px); font-weight: 800; margin-bottom: .1em; }
+    .intro-l2 { font-size: clamp(40px, 11vw, 110px); font-weight: 800; }
+    .intro-l3 { font-size: clamp(60px, 17vw, 180px); font-weight: 800; margin-top: -.05em; }
+    .intro-ch {
+      display: inline-block; color: var(--c);
+      -webkit-text-stroke: .07em #fff; paint-order: stroke fill;
+      text-shadow: .05em .06em 0 rgba(0,0,0,.18);
+      animation: introBounce 1.8s ease-in-out infinite;
+      animation-delay: calc(var(--i) * .09s);
+      filter: url(#wobble);
+    }
+    .intro-space { width: .3em; display: inline-block; }
+    @keyframes introBounce {
+      0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+      50% { transform: translateY(-.12em) rotate(calc(var(--r, 0deg) * -1)); }
+    }
+
+    #intro-tap {
+      margin-top: 3.5vh; font-size: clamp(16px, 3vw, 24px); font-weight: 800; color: #fff;
+      background: #ff6f91; border: 3px solid #fff; border-radius: 999px; padding: .4em 1.4em;
+      box-shadow: 0 5px 0 rgba(0,0,0,.18); cursor: pointer;
+      animation: introPulse 1.4s ease-in-out infinite;
+      filter: url(#wobble); display: inline-flex; align-items: center; gap: 8px;
+    }
+    @keyframes introPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+    
+    /* Xóa nền trắng ảnh sản phẩm và logo bằng mix-blend-mode */
+    .img-blend-darken {
+      mix-blend-mode: multiply;
+      filter: contrast(105%) brightness(102%);
+    }
+    .img-box {
+      background: #ffffff !important; /* Khi khung nền trắng thuần + mix-blend-mode multiply, nền trắng của ảnh biến mất 100% đồng nhất */
+    }
+
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-body text-oishi-choco">
+
+  <!-- ================= 1. PAGE LOADING SCREEN ================= -->
+  <div id="page-loader" aria-label="Đang tải trang">
+    <div class="flex flex-col items-center gap-4 text-center px-4">
+      <div class="relative">
+        <img src="imgs/logo-transparent.png" alt="Oishi" class="loader-snack-pack w-24 h-24 object-contain img-blend-darken drop-shadow-lg">
+        <span class="absolute -top-2 -right-2 text-2xl animate-bounce">✨</span>
+      </div>
+      <div>
+        <h2 class="font-display text-2xl md:text-3xl text-oishi-red font-extrabold tracking-wide">Oishi World Store</h2>
+        <p class="font-body text-sm md:text-base text-oishi-muted mt-1 font-semibold">Đang chuẩn bị những gói snack giòn rụm...</p>
+      </div>
+      <div class="loader-progress-bar mt-2">
+        <div class="loader-progress-inner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 2. OISHI INTRO OVERLAY ================= -->
+  <div id="oishi-intro-overlay" role="dialog" aria-modal="true" aria-label="Chào mừng đến với Vương Quốc Oishi">
+    <!-- Nút bỏ qua vào thẳng cửa hàng -->
+    <!-- Mặt trời vẽ bằng sáp màu -->
+    <svg class="intro-sun" viewBox="-100 -100 200 200" aria-hidden="true">
+      <g stroke="#ffb703" stroke-width="9" stroke-linecap="round" id="intro-rays"></g>
+      <circle r="45" fill="#ffd93d" stroke="#ff9f1c" stroke-width="7"/>
+      <circle cx="-14" cy="-6" r="4" fill="#c2410c"/><circle cx="14" cy="-6" r="4" fill="#c2410c"/>
+      <path d="M-16 10 Q0 26 16 10" fill="none" stroke="#c2410c" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+
+    <!-- Các đám mây trôi dạt -->
+    <div id="intro-clouds" class="absolute inset-0 pointer-events-none"></div>
+
+    <!-- Khối chữ cầu vồng nhún nhảy giữa màn hình -->
+    <div id="intro-center">
+      <div class="intro-line intro-l1" data-intro-text="Chào mừng đến với"></div>
+      <div class="intro-line intro-l2" data-intro-text="Vương Quốc Snack"></div>
+      <div class="intro-line intro-l3" data-intro-text="OISHI"></div>
+      <div id="intro-tap">
+        <span>✨ Nhấn để khám phá ngay ✨</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Bộ lọc vẽ sáp màu -->
+  <svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+      <filter id="crayon" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="warp"/>
+        <feDisplacementMap in="SourceGraphic" in2="warp" scale="7" result="wobbly"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="8" result="grain"/>
+        <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2 0 0 0 -0.3" result="grainA"/>
+        <feComposite in="wobbly" in2="grainA" operator="in"/>
+      </filter>
+      <filter id="wobble" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" result="w"/>
+        <feDisplacementMap in="SourceGraphic" in2="w" scale="5"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <svg id="paper" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <filter id="paperF"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="2"/><feColorMatrix type="saturate" values="0"/></filter>
+    <rect width="100%" height="100%" filter="url(#paperF)"/>
+  </svg>
+
+  <!-- Mây trôi nền trời -->
+  <div id="sky" aria-hidden="true"></div>
+
+  <div id="page" class="flex flex-col flex-1">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-oishi-cream/95 border-b-4 border-oishi-red shadow-md shadow-oishi-choco/10 backdrop-blur-sm">
+      <div class="max-w-6xl mx-auto px-page-margin py-3 flex items-center justify-between gap-gutter-md">
+        <a href="#trang-chu" class="flex items-center gap-gutter-sm shrink-0 group">
+          <img src="imgs/logo-transparent.png" alt="Logo Oishi" class="h-11 w-auto object-contain img-blend-darken group-hover:scale-105 transition-transform drop-shadow-sm">
+          <span class="hidden sm:inline font-display text-2xl text-oishi-red tracking-wide">O, Wow!</span>
+        </a>
+
+        <nav aria-label="Điều hướng chính" class="hidden md:flex items-center gap-gutter-lg">
+          <a href="#trang-chu" class="font-label text-label-lg text-oishi-red hover:text-oishi-red-deep transition-colors font-bold">Trang chủ</a>
+          <a href="#san-pham" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors">Sản phẩm</a>
+          <a href="#combo-uu-dai" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors">Combo vui</a>
+          <a href="product-detail.html" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-lg text-oishi-gold" style="font-variation-settings: 'FILL' 1;">3d_rotation</span>
+            <span>Chi tiết bánh</span>
+          </a>
+          <a href="cart.html" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors">Thanh toán</a>
+          <a href="#cau-chuyen" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors">Câu chuyện Oishi</a>
+        </nav>
+
+        <div class="flex items-center gap-gutter-sm">
+
+          <button id="replay-intro-btn" type="button" title="Xem lại màn hình giới thiệu Oishi" class="btn-cute hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-oishi-pink text-white font-label text-label-sm border-2 border-white shadow-xs hover:bg-pink-600">
+            <span class="material-symbols-outlined text-base">auto_awesome</span>
+            <span>Intro Oishi</span>
+          </button>
+          <button id="open-cart-btn" type="button" aria-label="Mở giỏ hàng" class="btn-cute inline-flex items-center justify-center gap-gutter-sm px-gutter-md py-2 rounded-full bg-oishi-red text-white font-label text-label-lg">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span class="hidden sm:inline">Giỏ hàng</span>
+            <span id="cart-count-badge" role="status" class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-white text-oishi-red font-label text-label-sm tabular-nums">
+              <span id="cart-count-text">0</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <!-- Hero Section -->
+      <section id="trang-chu" class="relative max-w-6xl mx-auto px-page-margin pt-gutter-xl pb-gutter-xl w-full">
+        <!-- Mặt trời vẽ sáp xoay -->
+        <svg class="sun-spin absolute -top-1 right-3 md:right-8 w-20 md:w-24 z-20 pointer-events-none" viewBox="-100 -100 200 200" aria-hidden="true">
+          <g filter="url(#crayon)">
+            <g stroke="#ffb703" stroke-width="9" stroke-linecap="round" id="rays"></g>
+            <circle r="45" fill="#ffd93d" stroke="#ff9f1c" stroke-width="7"/>
+            <circle cx="-14" cy="-6" r="4" fill="#c2410c"/><circle cx="14" cy="-6" r="4" fill="#c2410c"/>
+            <path d="M-16 10 Q0 26 16 10" fill="none" stroke="#c2410c" stroke-width="5" stroke-linecap="round"/>
+          </g>
+        </svg>
+
+        <div class="panel rounded-xl shadow-xl shadow-oishi-choco/15" style="--accent:#ff6f91; background:transparent">
+          <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-oishi-red via-oishi-orange to-oishi-red-deep border-4 border-white p-gutter-lg md:p-section text-white">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-center relative z-10">
+              
+              <!-- Left Hero Content -->
+              <div class="lg:col-span-7 flex flex-col items-start gap-gutter-md">
+                <span class="inline-flex items-center gap-gutter-xs px-gutter-md py-1 rounded-full bg-oishi-pink text-white font-label text-label-sm border-2 border-white shadow-sm">
+                  <span class="material-symbols-outlined text-body-md text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">auto_awesome</span>
+                  <span>Thế giới O, Wow!</span>
+                </span>
+
+                <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl leading-tight text-white drop-shadow-md">
+                  Giòn tan từng miếng,<br>
+                  <span class="text-oishi-gold drop-shadow">vui trọn ngày dài!</span>
+                </h1>
+
+                <p class="font-body text-base sm:text-lg text-white/95 max-w-lg leading-relaxed">
+                  Từ gói snack Tôm Cay trứ danh đến Bắp Phô Mai thơm béo và Crab Me ngộ nghĩnh. Khám phá chi tiết các hương vị và đặt mua bánh snack chính hãng giòn rụm giao nhanh 2 giờ!
+                </p>
+
+                <div class="flex flex-wrap items-center gap-gutter-md pt-gutter-xs">
+                  <a href="#san-pham" class="btn-cute inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-3 rounded-full bg-oishi-gold text-oishi-choco font-label text-label-lg font-bold">
+                    <span>Mua snack ngay</span>
+                    <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+                  </a>
+                  <a href="product-detail.html" class="btn-cute inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-3 rounded-full bg-white text-oishi-red font-label text-label-lg font-bold">
+                    <span class="material-symbols-outlined text-title-md">view_in_ar</span>
+                    <span>Xem chi tiết các vị</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Right Hero Showcase Grid (Collage 4 sản phẩm chính) -->
+              <div class="lg:col-span-5 flex justify-center">
+                <div class="relative w-full max-w-sm aspect-square bg-white/15 backdrop-blur-md rounded-2xl p-4 border-4 border-white/40 shadow-2xl flex items-center justify-center">
+                  <div class="grid grid-cols-2 gap-3 w-full h-full items-center">
+                    <a href="product-detail.html?id=tom-cay" class="bg-white/95 rounded-xl p-2.5 shadow-md flex flex-col items-center hover:scale-105 transition-transform group">
+                      <img src="imgs/oishi-tom.jpg" alt="Tôm Cay" class="h-24 w-auto object-contain img-blend-darken">
+                      <span class="text-xs font-bold text-oishi-red mt-1">Tôm Cay 42g</span>
+                    </a>
+                    <a href="product-detail.html?id=bap-pho-mai" class="bg-white/95 rounded-xl p-2.5 shadow-md flex flex-col items-center hover:scale-105 transition-transform group">
+                      <img src="imgs/oishi-bap.jpg" alt="Bắp Phô Mai" class="h-24 w-auto object-contain img-blend-darken">
+                      <span class="text-xs font-bold text-oishi-orange mt-1">Bắp Phô Mai</span>
+                    </a>
+                    <a href="product-detail.html?id=crab-me" class="bg-white/95 rounded-xl p-2.5 shadow-md flex flex-col items-center hover:scale-105 transition-transform group">
+                      <img src="imgs/oishi-cua.jpg" alt="Crab Me Cua" class="h-24 w-auto object-contain img-blend-darken">
+                      <span class="text-xs font-bold text-oishi-choco mt-1">Crab Me Cua</span>
+                    </a>
+                    <a href="product-detail.html?id=pho-mat-mieng" class="bg-white/95 rounded-xl p-2.5 shadow-md flex flex-col items-center hover:scale-105 transition-transform group">
+                      <img src="imgs/oishi-pho-mai.jpg" alt="Phô Mát Miếng" class="h-24 w-auto object-contain img-blend-darken">
+                      <span class="text-xs font-bold text-oishi-pink mt-1">Phô Mát Miếng</span>
+                    </a>
+                  </div>
+                  <!-- Tag nổi ở giữa -->
+                  <div class="absolute -bottom-3 px-4 py-1.5 rounded-full bg-oishi-gold text-oishi-choco font-display text-sm font-bold shadow-lg border-2 border-white">
+                    ✨ Giòn tan trọn vị
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Danh Sách Sản Phẩm -->
+      <section id="san-pham" class="max-w-6xl mx-auto px-page-margin pb-section w-full">
+        <div class="panel rounded-xl shadow-lg shadow-oishi-choco/10 p-gutter-lg md:p-section" style="--accent:#ffc94d">
+          
+          <div class="flex flex-col items-center text-center gap-gutter-sm mb-gutter-xl">
+            <h2 class="rainbow font-display text-headline-lg-mobile md:text-headline-lg">Sản phẩm Oishi nổi bật</h2>
+            <p class="font-body text-body-lg text-oishi-muted max-w-xl text-pretty">
+              Đầy đủ các hương vị bán chạy nhất, nướng giòn rụm không chiên. Nhấp vào từng gói bánh để xem thông tin chi tiết và đặt hàng!
+            </p>
+
+            <div id="category-filters" role="group" aria-label="Lọc theo hương vị" class="flex flex-wrap items-center justify-center gap-gutter-sm pt-gutter-sm">
+              <button data-filter="all" type="button" aria-pressed="true" class="filter-chip">Tất cả (6)</button>
+              <button data-filter="cay-hai-san" type="button" aria-pressed="false" class="filter-chip">Cay &amp; Hải sản</button>
+              <button data-filter="pho-mai-bap" type="button" aria-pressed="false" class="filter-chip">Phô mai &amp; Bắp</button>
+              <button data-filter="chay-thanh-dam" type="button" aria-pressed="false" class="filter-chip">Snack chay &amp; Hành</button>
+            </div>
+          </div>
+
+          <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter-xl items-stretch pb-2">
+
+            <!-- Product 1: Tôm Cay -->
+            <article data-category="cay-hai-san" style="--accent:#ff9bb5" class="product-card h-full rounded-lg bg-white p-gutter-md flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <a href="product-detail.html?id=tom-cay" class="img-box relative rounded-md p-gutter-md flex items-center justify-center aspect-square overflow-hidden group">
+                  <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-oishi-red text-white font-label text-label-sm z-10 font-bold">Bán chạy #1</span>
+                  <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-white/90 text-oishi-choco font-label text-xs z-10 flex items-center gap-0.5 shadow-xs">
+                    <span class="material-symbols-outlined text-sm text-oishi-orange">search</span>
+                    <span>Chi tiết</span>
+                  </span>
+                  <img src="imgs/oishi-tom.jpg" alt="Oishi Snack Tôm Cay 42g" class="w-4/5 h-4/5 object-contain img-blend-darken group-hover:scale-105 transition-transform">
+                </a>
+                <div class="flex items-center justify-between text-oishi-muted font-mono text-mono-sm">
+                  <span>42g • Không chiên</span>
+                  <span class="inline-flex items-center gap-1 text-oishi-choco font-label text-label-sm">
+                    <span class="material-symbols-outlined text-body-lg text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">star</span>
+                    <span class="tabular-nums font-bold">4.9</span>
+                  </span>
+                </div>
+                <a href="product-detail.html?id=tom-cay">
+                  <h3 class="font-title text-title-lg text-oishi-red hover:underline">Oishi Snack Tôm Cay</h3>
+                </a>
+                <p class="font-body text-body-md text-oishi-muted text-pretty">Vị tôm tươi tự nhiên hòa quyện ớt cay nồng, giòn rụm khó cưỡng.</p>
+              </div>
+              <footer class="flex items-center justify-between gap-gutter-sm pt-gutter-sm border-t-2 border-dashed border-oishi-border/70">
+                <span class="font-display text-headline-md text-oishi-choco tabular-nums">6.000₫</span>
+                <div class="flex items-center gap-1.5">
+                  <a href="product-detail.html?id=tom-cay" class="px-3 py-2 rounded-full bg-oishi-cream text-oishi-red border border-oishi-border font-label text-xs font-bold hover:bg-oishi-kraft-light flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                    <span>Chi tiết</span>
+                  </a>
+                  <button data-add-to-cart data-id="tom-cay" data-name="Oishi Snack Tôm Cay (42g)" data-price="6000" data-img="imgs/oishi-tom.jpg" type="button" class="btn-cute inline-flex items-center gap-gutter-xs px-gutter-md py-2 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+                    <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+                    <span>Thêm</span>
+                  </button>
+                </div>
+              </footer>
+            </article>
+
+            <!-- Product 2: Bắp Phô Mai -->
+            <article data-category="pho-mai-bap" style="--accent:#ffc94d" class="product-card h-full rounded-lg bg-white p-gutter-md flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <a href="product-detail.html?id=bap-pho-mai" class="img-box relative rounded-md p-gutter-md flex items-center justify-center aspect-square overflow-hidden group">
+                  <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-oishi-orange text-white font-label text-label-sm z-10 font-bold">Bé rất thích</span>
+                  <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-white/90 text-oishi-choco font-label text-xs z-10 flex items-center gap-0.5 shadow-xs">
+                    <span class="material-symbols-outlined text-sm text-oishi-orange">search</span>
+                    <span>Chi tiết</span>
+                  </span>
+                  <img src="imgs/oishi-bap.jpg" alt="Oishi Snack Bắp Vị Phô Mai 42g" class="w-4/5 h-4/5 object-contain img-blend-darken group-hover:scale-105 transition-transform">
+                </a>
+                <div class="flex items-center justify-between text-oishi-muted font-mono text-mono-sm">
+                  <span>42g • Nướng giòn</span>
+                  <span class="inline-flex items-center gap-1 text-oishi-choco font-label text-label-sm">
+                    <span class="material-symbols-outlined text-body-lg text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">star</span>
+                    <span class="tabular-nums font-bold">4.8</span>
+                  </span>
+                </div>
+                <a href="product-detail.html?id=bap-pho-mai">
+                  <h3 class="font-title text-title-lg text-oishi-red hover:underline">Oishi Snack Bắp Phô Mai</h3>
+                </a>
+                <p class="font-body text-body-md text-oishi-muted text-pretty">Làm từ nguyên liệu bắp ngọt tự nhiên phủ phô mai thơm béo dịu nhẹ.</p>
+              </div>
+              <footer class="flex items-center justify-between gap-gutter-sm pt-gutter-sm border-t-2 border-dashed border-oishi-border/70">
+                <span class="font-display text-headline-md text-oishi-choco tabular-nums">6.000₫</span>
+                <div class="flex items-center gap-1.5">
+                  <a href="product-detail.html?id=bap-pho-mai" class="px-3 py-2 rounded-full bg-oishi-cream text-oishi-red border border-oishi-border font-label text-xs font-bold hover:bg-oishi-kraft-light flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                    <span>Chi tiết</span>
+                  </a>
+                  <button data-add-to-cart data-id="bap-pho-mai" data-name="Oishi Snack Bắp Phô Mai (42g)" data-price="6000" data-img="imgs/oishi-bap.jpg" type="button" class="btn-cute inline-flex items-center gap-gutter-xs px-gutter-md py-2 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+                    <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+                    <span>Thêm</span>
+                  </button>
+                </div>
+              </footer>
+            </article>
+
+            <!-- Product 3: Crab Me Cua -->
+            <article data-category="cay-hai-san" style="--accent:#7cc4f5" class="product-card h-full rounded-lg bg-white p-gutter-md flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <a href="product-detail.html?id=crab-me" class="img-box relative rounded-md p-gutter-md flex items-center justify-center aspect-square overflow-hidden group">
+                  <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-oishi-red text-white font-label text-label-sm z-10 font-bold">Hình cua vui</span>
+                  <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-white/90 text-oishi-choco font-label text-xs z-10 flex items-center gap-0.5 shadow-xs">
+                    <span class="material-symbols-outlined text-sm text-oishi-orange">search</span>
+                    <span>Chi tiết</span>
+                  </span>
+                  <img src="imgs/oishi-cua.jpg" alt="Oishi Crab Me Snack Cua Xốt Chua Ngọt" class="w-4/5 h-4/5 object-contain img-blend-darken group-hover:scale-105 transition-transform">
+                </a>
+                <div class="flex items-center justify-between text-oishi-muted font-mono text-mono-sm">
+                  <span>40g • Hải sản</span>
+                  <span class="inline-flex items-center gap-1 text-oishi-choco font-label text-label-sm">
+                    <span class="material-symbols-outlined text-body-lg text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">star</span>
+                    <span class="tabular-nums font-bold">4.9</span>
+                  </span>
+                </div>
+                <a href="product-detail.html?id=crab-me">
+                  <h3 class="font-title text-title-lg text-oishi-red hover:underline">Oishi Crab Me! Snack Cua</h3>
+                </a>
+                <p class="font-body text-body-md text-oishi-muted text-pretty">Miếng bánh hình chú cua ngộ nghĩnh thấm đẫm xốt cua chua ngọt bắt vị.</p>
+              </div>
+              <footer class="flex items-center justify-between gap-gutter-sm pt-gutter-sm border-t-2 border-dashed border-oishi-border/70">
+                <span class="font-display text-headline-md text-oishi-choco tabular-nums">6.000₫</span>
+                <div class="flex items-center gap-1.5">
+                  <a href="product-detail.html?id=crab-me" class="px-3 py-2 rounded-full bg-oishi-cream text-oishi-red border border-oishi-border font-label text-xs font-bold hover:bg-oishi-kraft-light flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                    <span>Chi tiết</span>
+                  </a>
+                  <button data-add-to-cart data-id="crab-me" data-name="Oishi Crab Me! Snack Cua (40g)" data-price="6000" data-img="imgs/oishi-cua.jpg" type="button" class="btn-cute inline-flex items-center gap-gutter-xs px-gutter-md py-2 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+                    <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+                    <span>Thêm</span>
+                  </button>
+                </div>
+              </footer>
+            </article>
+
+            <!-- Product 4: Phô Mát Miếng -->
+            <article data-category="pho-mai-bap" style="--accent:#a791ff" class="product-card h-full rounded-lg bg-white p-gutter-md flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <a href="product-detail.html?id=pho-mat-mieng" class="img-box relative rounded-md p-gutter-md flex items-center justify-center aspect-square overflow-hidden group">
+                  <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-oishi-pink text-white font-label text-label-sm z-10 font-bold">Béo ngậy</span>
+                  <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-white/90 text-oishi-choco font-label text-xs z-10 flex items-center gap-0.5 shadow-xs">
+                    <span class="material-symbols-outlined text-sm text-oishi-orange">search</span>
+                    <span>Chi tiết</span>
+                  </span>
+                  <img src="imgs/oishi-pho-mai.jpg" alt="Oishi Snack Phô Mát Miếng 45g" class="w-4/5 h-4/5 object-contain img-blend-darken group-hover:scale-105 transition-transform">
+                </a>
+                <div class="flex items-center justify-between text-oishi-muted font-mono text-mono-sm">
+                  <span>45g • Đậm đà</span>
+                  <span class="inline-flex items-center gap-1 text-oishi-choco font-label text-label-sm">
+                    <span class="material-symbols-outlined text-body-lg text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">star</span>
+                    <span class="tabular-nums font-bold">4.9</span>
+                  </span>
+                </div>
+                <a href="product-detail.html?id=pho-mat-mieng">
+                  <h3 class="font-title text-title-lg text-oishi-red hover:underline">Oishi Snack Phô Mát Miếng</h3>
+                </a>
+                <p class="font-body text-body-md text-oishi-muted text-pretty">Lát snack giòn tan phủ bột phô mai béo ngậy chuẩn vị, ăn là ghiền.</p>
+              </div>
+              <footer class="flex items-center justify-between gap-gutter-sm pt-gutter-sm border-t-2 border-dashed border-oishi-border/70">
+                <span class="font-display text-headline-md text-oishi-choco tabular-nums">7.000₫</span>
+                <div class="flex items-center gap-1.5">
+                  <a href="product-detail.html?id=pho-mat-mieng" class="px-3 py-2 rounded-full bg-oishi-cream text-oishi-red border border-oishi-border font-label text-xs font-bold hover:bg-oishi-kraft-light flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                    <span>Chi tiết</span>
+                  </a>
+                  <button data-add-to-cart data-id="pho-mat-mieng" data-name="Oishi Snack Phô Mát Miếng (45g)" data-price="7000" data-img="imgs/oishi-pho-mai.jpg" type="button" class="btn-cute inline-flex items-center gap-gutter-xs px-gutter-md py-2 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+                    <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+                    <span>Thêm</span>
+                  </button>
+                </div>
+              </footer>
+            </article>
+
+            <!-- Product 5: Snack Hành -->
+            <article data-category="chay-thanh-dam" style="--accent:#7bd89b" class="product-card h-full rounded-lg bg-white p-gutter-md flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <a href="product-detail.html?id=snack-hanh" class="img-box relative rounded-md p-gutter-md flex items-center justify-center aspect-square overflow-hidden group">
+                  <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-oishi-success text-white font-label text-label-sm z-10 font-bold">Hành tây thật</span>
+                  <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-white/90 text-oishi-choco font-label text-xs z-10 flex items-center gap-0.5 shadow-xs">
+                    <span class="material-symbols-outlined text-sm text-oishi-orange">search</span>
+                    <span>Chi tiết</span>
+                  </span>
+                  <img src="imgs/oishi-hanh.jpg" alt="Oishi Snack Hành Onion Rings 42g" class="w-4/5 h-4/5 object-contain img-blend-darken group-hover:scale-105 transition-transform">
+                </a>
+                <div class="flex items-center justify-between text-oishi-muted font-mono text-mono-sm">
+                  <span>42g • Hành tây thật</span>
+                  <span class="inline-flex items-center gap-1 text-oishi-choco font-label text-label-sm">
+                    <span class="material-symbols-outlined text-body-lg text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">star</span>
+                    <span class="tabular-nums font-bold">4.7</span>
+                  </span>
+                </div>
+                <a href="product-detail.html?id=snack-hanh">
+                  <h3 class="font-title text-title-lg text-oishi-red hover:underline">Oishi Snack Hành Onion Rings</h3>
+                </a>
+                <p class="font-body text-body-md text-oishi-muted text-pretty">Vòng bánh giòn xốp thơm dịu mùi hành tây tươi, vị mặn ngọt hài hòa.</p>
+              </div>
+              <footer class="flex items-center justify-between gap-gutter-sm pt-gutter-sm border-t-2 border-dashed border-oishi-border/70">
+                <span class="font-display text-headline-md text-oishi-choco tabular-nums">6.000₫</span>
+                <div class="flex items-center gap-1.5">
+                  <a href="product-detail.html?id=snack-hanh" class="px-3 py-2 rounded-full bg-oishi-cream text-oishi-red border border-oishi-border font-label text-xs font-bold hover:bg-oishi-kraft-light flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                    <span>Chi tiết</span>
+                  </a>
+                  <button data-add-to-cart data-id="snack-hanh" data-name="Oishi Snack Hành (42g)" data-price="6000" data-img="imgs/oishi-hanh.jpg" type="button" class="btn-cute inline-flex items-center gap-gutter-xs px-gutter-md py-2 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+                    <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+                    <span>Thêm</span>
+                  </button>
+                </div>
+              </footer>
+            </article>
+
+            <!-- Product 6: Da Heo Marty's -->
+            <article data-category="chay-thanh-dam" style="--accent:#ffab6b" class="product-card h-full rounded-lg bg-white p-gutter-md flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <a href="product-detail.html?id=martys-chay" class="img-box relative rounded-md p-gutter-md flex items-center justify-center aspect-square overflow-hidden group">
+                  <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-oishi-success text-white font-label text-label-sm z-10 font-bold">0g Trans Fat</span>
+                  <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-white/90 text-oishi-choco font-label text-xs z-10 flex items-center gap-0.5 shadow-xs">
+                    <span class="material-symbols-outlined text-sm text-oishi-orange">search</span>
+                    <span>Chi tiết</span>
+                  </span>
+                  <img src="imgs/oishi-da-heo.jpg" alt="Oishi Marty's Snack Chay Vị Da Heo Quay" class="w-4/5 h-4/5 object-contain img-blend-darken group-hover:scale-105 transition-transform">
+                </a>
+                <div class="flex items-center justify-between text-oishi-muted font-mono text-mono-sm">
+                  <span>35g • Snack chay</span>
+                  <span class="inline-flex items-center gap-1 text-oishi-choco font-label text-label-sm">
+                    <span class="material-symbols-outlined text-body-lg text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">star</span>
+                    <span class="tabular-nums font-bold">4.8</span>
+                  </span>
+                </div>
+                <a href="product-detail.html?id=martys-chay">
+                  <h3 class="font-title text-title-lg text-oishi-red hover:underline">Oishi Marty's Vị Da Heo Quay</h3>
+                </a>
+                <p class="font-body text-body-md text-oishi-muted text-pretty">Snack chay giòn rụm đậm đà hương vị da heo quay, không chất béo chuyển hóa.</p>
+              </div>
+              <footer class="flex items-center justify-between gap-gutter-sm pt-gutter-sm border-t-2 border-dashed border-oishi-border/70">
+                <span class="font-display text-headline-md text-oishi-choco tabular-nums">7.000₫</span>
+                <div class="flex items-center gap-1.5">
+                  <a href="product-detail.html?id=martys-chay" class="px-3 py-2 rounded-full bg-oishi-cream text-oishi-red border border-oishi-border font-label text-xs font-bold hover:bg-oishi-kraft-light flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                    <span>Chi tiết</span>
+                  </a>
+                  <button data-add-to-cart data-id="martys-chay" data-name="Oishi Marty's Vị Da Heo Quay (35g)" data-price="7000" data-img="imgs/oishi-da-heo.jpg" type="button" class="btn-cute inline-flex items-center gap-gutter-xs px-gutter-md py-2 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+                    <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+                    <span>Thêm</span>
+                  </button>
+                </div>
+              </footer>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Combo Ưu Đãi -->
+      <section id="combo-uu-dai" class="max-w-6xl mx-auto px-page-margin pb-section w-full">
+        <div class="panel rounded-xl shadow-lg shadow-oishi-choco/10 p-gutter-lg md:p-section" style="--accent:#ff9bb5">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-xl items-center">
+            
+            <div class="lg:col-span-5 flex justify-center">
+              <div class="relative rounded-2xl bg-white p-4 border-4 border-oishi-pink/60 shadow-lg -rotate-2 max-w-sm w-full">
+                <div class="grid grid-cols-3 gap-2 p-2 bg-oishi-cream rounded-xl">
+                  <img src="imgs/oishi-tom.jpg" alt="Snack Oishi" class="h-20 w-auto object-contain mx-auto img-blend-darken">
+                  <img src="imgs/oishi-bap.jpg" alt="Snack Oishi" class="h-20 w-auto object-contain mx-auto img-blend-darken">
+                  <img src="imgs/oishi-cua.jpg" alt="Snack Oishi" class="h-20 w-auto object-contain mx-auto img-blend-darken">
+                  <img src="imgs/oishi-pho-mai.jpg" alt="Snack Oishi" class="h-20 w-auto object-contain mx-auto img-blend-darken">
+                  <img src="imgs/oishi-hanh.jpg" alt="Snack Oishi" class="h-20 w-auto object-contain mx-auto img-blend-darken">
+                  <img src="imgs/oishi-da-heo.jpg" alt="Snack Oishi" class="h-20 w-auto object-contain mx-auto img-blend-darken">
+                </div>
+                <div class="absolute -top-3 -right-3 bg-oishi-red text-white font-display text-xs px-3 py-1 rounded-full shadow-md font-bold">
+                  ĐỦ 6 VỊ
+                </div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-7 flex flex-col items-start gap-gutter-md">
+              <span class="px-gutter-md py-1 rounded-full bg-oishi-orange text-white font-label text-label-sm border-2 border-white shadow-sm font-bold">
+                Tiết kiệm 15% cho buổi tụ tập bạn bè
+              </span>
+
+              <h2 class="rainbow font-display text-headline-lg-mobile md:text-headline-lg">Combo Tiệc Vui 6 Gói Đủ Vị</h2>
+
+              <p class="font-body text-body-lg text-oishi-muted text-pretty">
+                Mang cả thế giới Oishi Friends về nhà với trọn bộ 6 vị bán chạy nhất: Tôm Cay, Bắp Phô Mai, Crab Me, Phô Mát Miếng, Snack Hành và Marty's Chay.
+              </p>
+
+              <div class="flex items-center gap-gutter-md">
+                <span class="font-display text-headline-lg text-oishi-red tabular-nums">32.000₫</span>
+                <span class="font-body text-body-lg text-oishi-muted line-through tabular-nums">38.000₫</span>
+                <span class="px-2.5 py-1 rounded-full bg-oishi-pink/15 text-oishi-pink text-xs font-bold font-label">Giảm 6.000₫</span>
+              </div>
+
+              <div class="flex flex-wrap gap-3">
+                <button data-add-to-cart data-id="combo-6-vi" data-name="Combo Tiệc Vui 6 Gói Đủ Vị" data-price="32000" data-img="imgs/oishi-tom.jpg" type="button" class="btn-cute inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-3 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_cart_checkout</span>
+                  <span>Thêm Combo vào giỏ</span>
+                </button>
+                <a href="cart.html" class="btn-cute inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-3 rounded-full bg-white text-oishi-choco font-label text-label-lg font-bold">
+                  <span>Xem trang thanh toán</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Khám Phá Hương Vị Banner -->
+      <section id="kham-pha" class="max-w-6xl mx-auto px-page-margin pb-section w-full">
+        <div class="panel rounded-xl shadow-lg shadow-oishi-choco/10 p-gutter-lg md:p-section text-center flex flex-col items-center gap-gutter-md" style="--accent:#a791ff">
+          <span class="px-4 py-1 rounded-full bg-oishi-pink text-white font-label text-xs font-bold">THẾ GIỚI SNACK OISHI CHÍNH HÃNG</span>
+          <h2 class="rainbow font-display text-headline-lg-mobile md:text-headline-lg">Hương vị đa dạng, niềm vui bất tận</h2>
+          <p class="font-body text-body-lg text-oishi-muted max-w-xl text-pretty">
+            Khám phá chi tiết từng gói bánh snack Oishi, bảng thành phần dinh dưỡng và chọn mua những hương vị yêu thích với ưu đãi hấp dẫn.
+          </p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <a href="product-detail.html?id=tom-cay" class="btn-cute inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-3 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+              <span>Xem chi tiết sản phẩm</span>
+            </a>
+            <a href="cart.html" class="btn-cute inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-3 rounded-full bg-white text-oishi-choco font-label text-label-lg font-bold">
+              <span>Giỏ hàng &amp; Thanh toán</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Câu Chuyện Oishi -->
+      <section id="cau-chuyen" class="max-w-6xl mx-auto px-page-margin pb-section w-full">
+        <div class="panel rounded-xl shadow-md p-gutter-lg md:p-gutter-xl flex flex-col md:flex-row items-center justify-between gap-gutter-lg" style="--accent:#7bd89b">
+          <div class="flex items-center gap-gutter-md">
+            <img src="imgs/logo-transparent.png" alt="Thương hiệu Oishi" class="h-16 w-auto object-contain img-blend-darken shrink-0 drop-shadow-sm">
+            <div class="flex flex-col gap-gutter-xs">
+              <h2 class="font-display text-headline-md text-oishi-choco">Hành trình Oishi — Luôn giòn, luôn vui</h2>
+              <p class="font-body text-body-md text-oishi-muted max-w-prose text-pretty">
+                Từ những gói bánh phồng tôm đầu tiên đến thế giới snack đa dạng sắc màu, Oishi cam kết mang lại niềm vui giòn tan an toàn cho mọi gia đình Việt Nam.
+              </p>
+            </div>
+          </div>
+          <a href="#san-pham" class="btn-cute shrink-0 inline-flex items-center gap-gutter-xs px-gutter-lg py-3 rounded-full bg-oishi-red text-white font-label text-label-lg font-bold">
+            <span>Chọn vị yêu thích</span>
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">north</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Chân trang -->
+    <div class="scallop mt-auto" aria-hidden="true"></div>
+    <footer class="bg-oishi-footer text-white pb-12">
+      <div class="max-w-6xl mx-auto px-page-margin py-section">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter-xl pb-gutter-xl border-b border-white/15 items-start">
+          
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <div class="inline-flex items-center bg-white/95 px-3 py-1.5 rounded-lg w-fit shadow-xs">
+              <img src="imgs/logo-transparent.png" alt="Logo Oishi" class="h-8 w-auto object-contain img-blend-darken">
+            </div>
+            <p class="font-body text-body-md text-white/75">
+              Thế giới bánh snack chính hãng Oishi Việt Nam. Giòn tan từng miếng, vui trọn ngày dài.
+            </p>
+          </div>
+
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <h3 class="font-label text-label-lg text-white">TRANG CHỦ</h3>
+            <ul class="flex flex-col gap-gutter-xs font-body text-body-md text-white/75">
+              <li><a href="index.html" class="hover:text-white">Thế giới Oishi</a></li>
+              <li><a href="#san-pham" class="hover:text-white">Sản phẩm nổi bật</a></li>
+              <li><a href="#combo-uu-dai" class="hover:text-white">Combo Tiệc Vui</a></li>
+              <li><a href="product-detail.html" class="hover:text-white">Chi tiết các sản phẩm</a></li>
+            </ul>
+          </div>
+
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <h3 class="font-label text-label-lg text-white">HƯƠNG VỊ YÊU THÍCH</h3>
+            <ul class="flex flex-col gap-gutter-xs font-body text-body-md text-white/75">
+              <li><a href="product-detail.html?id=tom-cay" class="hover:text-white">Snack Tôm Cay 42g</a></li>
+              <li><a href="product-detail.html?id=bap-pho-mai" class="hover:text-white">Snack Bắp Phô Mai</a></li>
+              <li><a href="product-detail.html?id=crab-me" class="hover:text-white">Crab Me! Snack Cua</a></li>
+              <li><a href="product-detail.html?id=martys-chay" class="hover:text-white">Snack Da Heo Chay Marty's</a></li>
+            </ul>
+          </div>
+
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <h3 class="font-label text-label-lg text-white">LIÊN HỆ & CSKH</h3>
+            <ul class="flex flex-col gap-gutter-xs font-body text-body-md text-white/75">
+              <li class="tabular-nums">Hotline: 1900 636 888</li>
+              <li>Email: cskh@oishisnack.vn</li>
+              <li>TP. Hồ Chí Minh, Việt Nam</li>
+              <li><a href="cart.html" class="hover:text-white">Trang thanh toán giỏ hàng</a></li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="pt-gutter-lg flex flex-col sm:flex-row items-center justify-between gap-gutter-sm font-body text-xs text-white/60">
+          <span>© 2026 Oishi World Store. Tất cả các quyền được bảo lưu.</span>
+          <span>Sản phẩm chính hãng Oishi Liwayway Vietnam.</span>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /#page -->
+
+  <!-- Giỏ Hàng Drawer trượt từ bên phải -->
+  <dialog id="cart-drawer" aria-labelledby="cart-drawer-title" class="fixed inset-y-0 right-0 m-0 ml-auto h-screen max-h-screen w-full max-w-md rounded-l-lg bg-oishi-cream text-oishi-choco shadow-2xl p-0 backdrop:bg-oishi-footer/55">
+    <div class="flex flex-col h-full">
+      <header class="flex items-center justify-between px-gutter-lg py-gutter-md border-b-4 border-oishi-pink bg-white">
+        <div class="flex items-center gap-gutter-sm">
+          <span class="material-symbols-outlined text-title-lg text-oishi-red" aria-hidden="true">shopping_bag</span>
+          <h2 id="cart-drawer-title" class="font-display text-title-lg text-oishi-choco">Giỏ hàng của bạn</h2>
+        </div>
+        <button id="close-cart-btn" type="button" aria-label="Đóng giỏ hàng" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-oishi-kraft-light text-oishi-choco hover:bg-oishi-kraft transition-colors">
+          <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <div id="cart-items-container" class="flex-1 overflow-y-auto p-gutter-lg flex flex-col gap-gutter-md"></div>
+
+      <footer class="p-gutter-lg border-t border-oishi-border bg-white flex flex-col gap-gutter-md">
+        <div class="flex items-center justify-between">
+          <span class="font-title text-title-md text-oishi-choco">Tạm tính</span>
+          <span id="cart-total-text" class="font-display text-headline-md text-oishi-red tabular-nums">0₫</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <a href="cart.html" class="btn-cute inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-full bg-white text-oishi-choco font-label text-sm border-2 border-oishi-border font-bold">
+            <span>Chi tiết giỏ</span>
+          </a>
+          <a href="cart.html#checkout" class="btn-cute inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-full bg-oishi-red text-white font-label text-sm font-bold">
+            <span>Đặt hàng ngay</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </a>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- Thông Báo Toast -->
+  <div id="toast-banner" role="status" aria-live="polite" class="hidden fixed bottom-6 right-6 z-50 rounded-full bg-oishi-choco text-white px-gutter-lg py-3 shadow-xl flex items-center gap-gutter-sm border-2 border-white">
+    <span class="material-symbols-outlined text-title-md text-oishi-gold" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
+    <span id="toast-text" class="font-label text-label-lg">Đã thêm vào giỏ hàng</span>
+  </div>
+
+  <script src="products-data.js"></script>
+  <script>
+    /* ================= Hiệu ứng giao diện hoạt hình ================= */
+    (function () {
+      var NS = 'http://www.w3.org/2000/svg';
+
+      // Tia nắng mặt trời
+      var rays = document.getElementById('rays');
+      if (rays) {
+        for (var i = 0; i < 12; i++) {
+          var a = i * Math.PI / 6;
+          var l = document.createElementNS(NS, 'line');
+          l.setAttribute('x1', Math.cos(a) * 58); l.setAttribute('y1', Math.sin(a) * 58);
+          l.setAttribute('x2', Math.cos(a) * 88); l.setAttribute('y2', Math.sin(a) * 88);
+          rays.appendChild(l);
+        }
+      }
+
+      // Chữ nhiều màu nhún nhảy
+      var COLORS = ['#ff4d6d', '#ff9f1c', '#2ec4b6', '#7b5cff', '#ff6f91', '#3a86ff', '#8ac926'];
+      var ci = 0;
+      document.querySelectorAll('.rainbow').forEach(function (el) {
+        var text = el.textContent.trim().replace(/\s+/g, ' ').normalize('NFC');
+        el.setAttribute('aria-label', text);
+        el.textContent = '';
+        var wrap = document.createElement('span');
+        wrap.setAttribute('aria-hidden', 'true');
+        var words = text.split(' ');
+        words.forEach(function (word, wi) {
+          var w = document.createElement('span');
+          w.className = 'word';
+          Array.from(word).forEach(function (ch) {
+            var s = document.createElement('span');
+            s.className = 'ch';
+            s.textContent = ch;
+            s.style.setProperty('--c', COLORS[ci % COLORS.length]);
+            s.style.setProperty('--i', ci);
+            s.style.setProperty('--r', (ci % 2 ? 2 : -2) + 'deg');
+            ci++;
+            w.appendChild(s);
+          });
+          wrap.appendChild(w);
+          if (wi < words.length - 1) wrap.appendChild(document.createTextNode(' '));
+        });
+        el.appendChild(wrap);
+      });
+
+      // Mây trôi sáp màu
+      var CLOUD_DEFS = [
+        [ 6,  -6, 30, '#ffffff', '#7cc4f5', 15],
+        [12,  66, 26, '#fff1f5', '#ff9bb5', 18],
+        [38,  -9, 24, '#fff8d6', '#ffc94d', 13],
+        [46,  80, 26, '#e9f9ee', '#7bd89b', 16],
+        [70,  -5, 28, '#f1ecff', '#a791ff', 17],
+        [78,  70, 30, '#ffffff', '#7cc4f5', 14],
+        [90,  30, 24, '#ffeedd', '#ffab6b', 19]
+      ];
+      function cloudSVG(fill, stroke) {
+        var C = [[50,95,38],[105,70,50],[170,60,58],[235,78,46],[275,100,32],[150,105,60]];
+        var svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', '0 0 310 170');
+        function g(r) {
+          return C.map(function (c) { return '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + (c[2] + r) + '"/>'; }).join('') +
+            '<rect x="' + (50 - r) + '" y="' + (100 - r) + '" width="' + (225 + 2 * r) + '" height="' + (50 + 2 * r) + '" rx="25"/>';
+        }
+        svg.innerHTML =
+          '<g fill="' + stroke + '">' + g(8) + '</g>' +
+          '<g fill="' + fill + '">' + g(0) + '</g>' +
+          '<g stroke="' + stroke + '" stroke-width="5" stroke-linecap="round" opacity=".55" fill="none">' +
+            '<path d="M70 120 l22 -26"/><path d="M95 130 l26 -30"/><path d="M130 135 l26 -32"/>' +
+            '<path d="M170 135 l24 -30"/><path d="M205 128 l20 -24"/></g>';
+        return svg;
+      }
+      var sky = document.getElementById('sky');
+      CLOUD_DEFS.forEach(function (d) {
+        var el = document.createElement('div');
+        el.className = 'cloud';
+        el.style.cssText = 'top:' + d[0] + '%;left:' + d[1] + '%;width:' + d[2] + 'vw;';
+        var inner = document.createElement('div');
+        inner.className = 'drift';
+        inner.style.setProperty('--dur', d[5] + 's');
+        inner.appendChild(cloudSVG(d[3], d[4]));
+        el.appendChild(inner);
+        sky.appendChild(el);
+      });
+    })();
+
+    /* ================= Quản lý Giỏ hàng & Bộ lọc ================= */
+    (function () {
+      const cartDrawer = document.getElementById('cart-drawer');
+      const openCartBtn = document.getElementById('open-cart-btn');
+      const closeCartBtn = document.getElementById('close-cart-btn');
+      const cartItemsContainer = document.getElementById('cart-items-container');
+      const cartCountText = document.getElementById('cart-count-text');
+      const cartTotalText = document.getElementById('cart-total-text');
+      const toastBanner = document.getElementById('toast-banner');
+      const toastText = document.getElementById('toast-text');
+      let toastTimer = null;
+
+      function showToast(message) {
+        toastText.textContent = message;
+        toastBanner.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toastBanner.classList.add('hidden');
+        }, 2200);
+      }
+
+      function renderCart() {
+        const totalQty = OishiCart.getTotalCount();
+        const totalPrice = OishiCart.getTotalPrice();
+
+        cartCountText.textContent = String(totalQty);
+        cartTotalText.textContent = OishiCart.formatVND(totalPrice);
+
+        const cart = OishiCart.getCart();
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML =
+            '<div class="flex flex-col items-center justify-center text-center py-12 gap-gutter-sm">' +
+              '<span class="material-symbols-outlined text-display-lg text-oishi-muted" aria-hidden="true">shopping_basket</span>' +
+              '<p class="font-title text-title-md text-oishi-choco">Giỏ hàng đang trống</p>' +
+              '<p class="font-body text-body-md text-oishi-muted">Hãy chọn vài gói snack Oishi giòn tan nhé!</p>' +
+            '</div>';
+          return;
+        }
+
+        cartItemsContainer.innerHTML = cart.map(function (item) {
+          return (
+            '<div class="flex items-center gap-gutter-md p-gutter-sm rounded-md bg-white border-2 border-oishi-border shadow-xs">' +
+              '<img src="' + item.image + '" alt="' + item.name + '" class="w-16 h-16 object-contain rounded-sm bg-oishi-cream p-1">' +
+              '<div class="flex-1 min-w-0">' +
+                '<h3 class="font-title text-title-md text-oishi-choco truncate">' + item.name + '</h3>' +
+                '<p class="font-label text-label-lg text-oishi-red tabular-nums">' + OishiCart.formatVND(item.price) + '</p>' +
+              '</div>' +
+              '<div class="flex items-center gap-gutter-xs">' +
+                '<button type="button" data-qty-change="-1" data-id="' + item.id + '" aria-label="Giảm số lượng" class="w-7 h-7 rounded-full bg-oishi-kraft-light border border-oishi-border text-oishi-choco flex items-center justify-center hover:bg-oishi-kraft font-bold">-</button>' +
+                '<span class="w-6 text-center font-label text-label-lg tabular-nums font-bold">' + item.qty + '</span>' +
+                '<button type="button" data-qty-change="1" data-id="' + item.id + '" aria-label="Tăng số lượng" class="w-7 h-7 rounded-full bg-oishi-kraft-light border border-oishi-border text-oishi-choco flex items-center justify-center hover:bg-oishi-kraft font-bold">+</button>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join('');
+      }
+
+      window.addEventListener('oishi-cart-updated', renderCart);
+
+      document.querySelectorAll('[data-add-to-cart]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const id = btn.getAttribute('data-id');
+          const name = btn.getAttribute('data-name');
+          const price = Number(btn.getAttribute('data-price'));
+          const image = btn.getAttribute('data-img') || 'imgs/oishi-tom.jpg';
+
+          OishiCart.addItem({
+            id: id,
+            name: name,
+            price: price,
+            image: image,
+            weight: 'Gói chuẩn 42g'
+          }, 1);
+
+          showToast('Đã thêm ' + name);
+        });
+      });
+
+      cartItemsContainer.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-qty-change]');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const delta = Number(btn.getAttribute('data-qty-change'));
+        OishiCart.updateQty(id, delta);
+      });
+
+      openCartBtn.addEventListener('click', function () {
+        renderCart();
+        if (typeof cartDrawer.showModal === 'function') {
+          cartDrawer.showModal();
+        }
+      });
+
+      closeCartBtn.addEventListener('click', function () {
+        cartDrawer.close();
+      });
+
+      cartDrawer.addEventListener('click', function (e) {
+        if (e.target === cartDrawer) {
+          cartDrawer.close();
+        }
+      });
+
+      // Bộ lọc danh mục
+      const filterChips = document.querySelectorAll('.filter-chip');
+      const productCards = document.querySelectorAll('.product-card');
+
+      filterChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          const filter = chip.getAttribute('data-filter');
+
+          filterChips.forEach(function (c) {
+            c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+          });
+
+          productCards.forEach(function (card) {
+            const cat = card.getAttribute('data-category');
+            if (filter === 'all' || cat === filter) {
+              card.classList.remove('hidden');
+            } else {
+              card.classList.add('hidden');
+            }
+          });
+        });
+      });
+
+      renderCart();
+    })();
+  
+    /* ================= 3. ĐIỀU KHIỂN PAGE LOADER & OISHI INTRO ================= */
+    (function () {
+      // 1. Quản lý Page Loader
+      const pageLoader = document.getElementById('page-loader');
+      function hideLoader() {
+        if (!pageLoader || pageLoader.classList.contains('loader-hidden')) return;
+        pageLoader.classList.add('loader-hidden');
+        setTimeout(() => {
+          if (pageLoader && pageLoader.parentNode) {
+            pageLoader.style.display = 'none';
+          }
+        }, 600);
+      }
+
+      // Ẩn loader khi tài nguyên tải xong, hoặc tối đa 800ms
+      window.addEventListener('load', function () {
+        setTimeout(hideLoader, 400);
+      });
+      setTimeout(hideLoader, 1500); // Safety fallback
+
+      // 2. Quản lý Oishi Intro
+      const introOverlay = document.getElementById('oishi-intro-overlay');
+      const introTapBtn = document.getElementById('intro-tap');
+      const replayIntroBtn = document.getElementById('replay-intro-btn');
+      const introRays = document.getElementById('intro-rays');
+      const introCloudsWrap = document.getElementById('intro-clouds');
+
+      // Vẽ tia nắng mặt trời intro
+      if (introRays) {
+        for (let i = 0; i < 12; i++) {
+          const a = i * Math.PI / 6;
+          const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          l.setAttribute('x1', Math.cos(a) * 58);
+          l.setAttribute('y1', Math.sin(a) * 58);
+          l.setAttribute('x2', Math.cos(a) * 88);
+          l.setAttribute('y2', Math.sin(a) * 88);
+          introRays.appendChild(l);
+        }
+      }
+
+      // Hiệu ứng chữ cầu vồng từng ký tự
+      const INTRO_COLORS = ['#ff4d6d', '#ff9f1c', '#2ec4b6', '#7b5cff', '#ff6f91', '#3a86ff', '#8ac926'];
+      let introIdx = 0;
+      document.querySelectorAll('[data-intro-text]').forEach(function (line) {
+        const isBrand = line.classList.contains('intro-l3');
+        const text = line.getAttribute('data-intro-text');
+        Array.from(text.normalize('NFC')).forEach(function (ch) {
+          const s = document.createElement('span');
+          if (ch === ' ') {
+            s.className = 'intro-space intro-ch';
+            s.innerHTML = '&nbsp;';
+            s.style.animation = 'none';
+            s.style.filter = 'none';
+          } else {
+            s.className = 'intro-ch';
+            s.textContent = ch;
+            s.style.setProperty('--c', isBrand ? '#e8281c' : INTRO_COLORS[introIdx % INTRO_COLORS.length]);
+            s.style.setProperty('--i', introIdx);
+            s.style.setProperty('--r', (introIdx % 2 ? 3 : -3) + 'deg');
+            introIdx++;
+          }
+          line.appendChild(s);
+        });
+      });
+
+      // Tạo các đám mây intro
+      const INTRO_CLOUD_DEFS = [
+        [2, -4, 34, '#ffffff', '#7cc4f5', 15],
+        [8, 58, 30, '#fff1f5', '#ff9bb5', 18],
+        [30, -8, 28, '#fff8d6', '#ffc94d', 13],
+        [34, 74, 32, '#e9f9ee', '#7bd89b', 16],
+        [58, -6, 34, '#f1ecff', '#a791ff', 17],
+        [62, 62, 36, '#ffffff', '#7cc4f5', 14],
+        [80, 20, 30, '#ffeedd', '#ffab6b', 19],
+        [82, 70, 26, '#fff1f5', '#ff9bb5', 12],
+        [16, 30, 20, '#ffffff', '#7cc4f5', 20],
+      ];
+
+      function createIntroCloudSVG(fill, stroke) {
+        const C = [[50,95,38],[105,70,50],[170,60,58],[235,78,46],[275,100,32],[150,105,60]];
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 310 170');
+        const g = function (r) {
+          return C.map(c => '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + (c[2] + r) + '"/>').join('') +
+            '<rect x="' + (50 - r) + '" y="' + (100 - r) + '" width="' + (225 + 2 * r) + '" height="' + (50 + 2 * r) + '" rx="25"/>';
+        };
+        svg.innerHTML =
+          '<g fill="' + stroke + '">' + g(8) + '</g>' +
+          '<g fill="' + fill + '">' + g(0) + '</g>' +
+          '<g stroke="' + stroke + '" stroke-width="5" stroke-linecap="round" opacity=".55" fill="none">' +
+            '<path d="M70 120 l22 -26"/><path d="M95 130 l26 -30"/><path d="M130 135 l26 -32"/>' +
+            '<path d="M170 135 l24 -30"/><path d="M205 128 l20 -24"/></g>';
+        return svg;
+      }
+
+      if (introCloudsWrap) {
+        INTRO_CLOUD_DEFS.forEach(function (d) {
+          const cloudDiv = document.createElement('div');
+          cloudDiv.className = 'intro-cloud ' + (d[1] + d[2] / 2 < 50 ? 'left' : 'right');
+          cloudDiv.style.cssText = 'top:' + d[0] + '%;left:' + d[1] + '%;width:' + d[2] + 'vw;';
+          const inner = document.createElement('div');
+          inner.className = 'intro-drift';
+          inner.style.setProperty('--dur', d[5] + 's');
+          inner.style.animationDelay = (-Math.random() * d[5]) + 's';
+          inner.appendChild(createIntroCloudSVG(d[3], d[4]));
+          cloudDiv.appendChild(inner);
+          introCloudsWrap.appendChild(cloudDiv);
+        });
+      }
+
+      // Xử lý đóng Intro khi người dùng nhấn
+      let introLeaving = false;
+      function dismissIntro(immediate) {
+        if (!introOverlay || introLeaving) return;
+        introLeaving = true;
+
+        if (immediate) {
+          introOverlay.classList.add('intro-hidden');
+          sessionStorage.setItem('oishi_intro_viewed', 'true');
+          return;
+        }
+
+        // Kích hoạt animation mây tách sang 2 bên, chữ phóng to tan biến
+        introOverlay.classList.add('leaving');
+        setTimeout(function () {
+          introOverlay.classList.add('intro-hidden');
+          sessionStorage.setItem('oishi_intro_viewed', 'true');
+        }, 1200);
+      }
+
+      // Nếu đã xem intro trước đó trong phiên duyệt web (hoặc quay về trang chủ), không load lại intro
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceIntro = urlParams.get('intro') === '1';
+      const skipIntro = urlParams.get('nointro') === '1';
+
+      if (!forceIntro && (sessionStorage.getItem('oishi_intro_viewed') === 'true' || skipIntro)) {
+        introOverlay.classList.add('intro-hidden');
+      }
+
+      // Bắt sự kiện click để kết thúc intro
+      introOverlay.addEventListener('click', function (e) {
+        dismissIntro(false);
+      });
+
+      window.addEventListener('keydown', function (e) {
+        if (!introOverlay.classList.contains('intro-hidden')) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            dismissIntro(false);
+          } else if (e.key === 'Escape') {
+            dismissIntro(true);
+          }
+        }
+      });
+
+      // Nút replay intro
+      if (replayIntroBtn) {
+        replayIntroBtn.addEventListener('click', function () {
+          introLeaving = false;
+          introOverlay.classList.remove('intro-hidden');
+          introOverlay.classList.remove('leaving');
+        });
+      }
+    })();
+
+  </script>
+</body>
+</html>
