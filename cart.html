@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="imgs/favicon.svg">
+  <link rel="icon" type="image/png" sizes="64x64" href="imgs/favicon.png">
+  <link rel="apple-touch-icon" href="imgs/favicon.png">
+  <title>Giỏ hàng & Thanh toán — Oishi World Store</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'oishi-red': '#C8102E',
+            'oishi-red-deep': '#9E001F',
+            'oishi-orange': '#C2410C',
+            'oishi-choco': '#4A1F0E',
+            'oishi-kraft': '#EBC8A4',
+            'oishi-kraft-light': '#F6E3CE',
+            'oishi-cream': '#FFF9F2',
+            'oishi-footer': '#1E1A18',
+            'oishi-gold': '#F59E0B',
+            'oishi-success': '#15803D',
+            'oishi-border': '#DEC0A1',
+            'oishi-muted': '#6E4C3D',
+            'oishi-pink': '#ff6f91',
+          },
+          fontFamily: {
+            'display': ['"Baloo 2"', '"Comic Sans MS"', 'cursive'],
+            'headline': ['"Baloo 2"', '"Comic Sans MS"', 'cursive'],
+            'title': ['"Baloo 2"', '"Comic Sans MS"', 'cursive'],
+            'body': ['"Nunito"', 'sans-serif'],
+            'label': ['"Nunito"', 'sans-serif'],
+            'mono': ['"Source Code Pro"', 'monospace'],
+          },
+          borderRadius: {
+            'sm': '8px', 'DEFAULT': '12px', 'md': '16px', 'lg': '24px', 'xl': '32px', 'full': '9999px',
+          },
+          spacing: {
+            'gutter-xs': '4px', 'gutter-sm': '8px', 'gutter-md': '16px', 'gutter-lg': '24px',
+            'gutter-xl': '32px', 'section': '48px', 'page-margin': '24px',
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined {
+      display: inline-block; width: 1em; height: 1em; line-height: 1 !important;
+      box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: linear-gradient(180deg, #9fd8ff 0%, #d9f0ff 100%) fixed;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #paper {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; opacity: .22; mix-blend-mode: multiply; z-index: 60;
+    }
+    #sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .cloud { position: absolute; transition: transform 1.6s cubic-bezier(.2,.7,.3,1), opacity 1.6s; }
+    .cloud svg { display: block; width: 100%; height: auto; overflow: visible; filter: url(#crayon); }
+    .drift { animation: drift var(--dur, 14s) ease-in-out infinite alternate; }
+    @keyframes drift { from { transform: translate(-2.5vw, 0); } to { transform: translate(2.5vw, -1.5vh); } }
+    #page { position: relative; z-index: 10; animation: fadeUp .6s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+    .rainbow .word { display: inline-block; white-space: nowrap; }
+    .rainbow .ch {
+      display: inline-block; color: var(--c);
+      -webkit-text-stroke: .08em #fff; paint-order: stroke fill;
+      text-shadow: .05em .06em 0 rgba(0,0,0,.18);
+      animation: bounce 2s ease-in-out infinite;
+      animation-delay: calc(var(--i) * .08s);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+      50% { transform: translateY(-.1em) rotate(calc(var(--r, 0deg) * -1)); }
+    }
+
+    .panel { position: relative; background: rgba(255,249,242,.96); }
+    .panel::before {
+      content: ''; position: absolute; inset: -3px; border-radius: inherit;
+      border: 5px solid var(--accent, #7cc4f5); filter: url(#wobble); pointer-events: none;
+    }
+
+    .btn-cute {
+      border: 3px solid #fff; box-shadow: 0 5px 0 rgba(0,0,0,.2);
+      transition: transform .12s, box-shadow .12s, background-color .15s;
+    }
+    .btn-cute:hover { transform: scale(1.03); }
+    .btn-cute:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+
+    .scallop {
+      height: 14px; background: radial-gradient(circle at 14px 0, transparent 13px, #1E1A18 14px) repeat-x;
+      background-size: 28px 14px;
+    }
+  
+    /* Xóa nền trắng ảnh sản phẩm và logo */
+    .img-blend-darken {
+      mix-blend-mode: multiply;
+      filter: contrast(105%) brightness(102%);
+    }
+
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-body text-oishi-choco">
+
+  <!-- SVG Filters -->
+  <svg width="0" height="0" class="absolute pointer-events-none" aria-hidden="true">
+    <defs>
+      <filter id="crayon" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="warp"/>
+        <feDisplacementMap in="SourceGraphic" in2="warp" scale="6" result="wobbly"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="8" result="grain"/>
+        <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2 0 0 0 -0.3" result="grainA"/>
+        <feComposite in="wobbly" in2="grainA" operator="in"/>
+      </filter>
+      <filter id="wobble" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" result="w"/>
+        <feDisplacementMap in="SourceGraphic" in2="w" scale="4"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <svg id="paper" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <filter id="paperF"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="2"/><feColorMatrix type="saturate" values="0"/></filter>
+    <rect width="100%" height="100%" filter="url(#paperF)"/>
+  </svg>
+
+  <div id="sky" aria-hidden="true"></div>
+
+  <div id="page" class="flex flex-col flex-1">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-oishi-cream/95 border-b-4 border-oishi-red shadow-md shadow-oishi-choco/10 backdrop-blur-sm">
+      <div class="max-w-6xl mx-auto px-page-margin py-3 flex items-center justify-between gap-gutter-md">
+        <a href="index.html" class="flex items-center gap-gutter-sm shrink-0 group">
+          <img src="imgs/logo-transparent.png" alt="Logo Oishi" class="h-11 w-auto object-contain img-blend-darken group-hover:scale-105 transition-transform drop-shadow-sm">
+          <span class="hidden sm:inline font-display text-2xl text-oishi-red tracking-wide">O, Wow!</span>
+        </a>
+
+        <nav aria-label="Điều hướng chính" class="hidden md:flex items-center gap-gutter-lg">
+          <a href="index.html" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors">Trang chủ</a>
+          <a href="index.html#san-pham" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors">Sản phẩm</a>
+          <a href="product-detail.html" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-lg">view_in_ar</span>
+            <span>Chi tiết 3D</span>
+          </a>
+          <a href="cart.html" class="font-label text-label-lg text-oishi-red font-bold">Giỏ hàng & Thanh toán</a>
+          <a href="index.html#cau-chuyen" class="font-label text-label-lg text-oishi-choco hover:text-oishi-red transition-colors">Câu chuyện Oishi</a>
+        </nav>
+
+        <a href="index.html#san-pham" class="btn-cute inline-flex items-center justify-center gap-1 px-4 py-2 rounded-full bg-white text-oishi-red font-label text-sm border-2 border-oishi-red">
+          <span class="material-symbols-outlined text-base">storefront</span>
+          <span>Chọn thêm bánh</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-6xl mx-auto px-page-margin py-gutter-lg w-full">
+
+      <!-- Breadcrumbs & Step Indicator -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-gutter-lg">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 font-label text-sm text-oishi-muted">
+          <a href="index.html" class="hover:text-oishi-red flex items-center gap-1">
+            <span class="material-symbols-outlined text-base">home</span>
+            <span>Trang chủ</span>
+          </a>
+          <span>/</span>
+          <span class="text-oishi-red font-bold">Giỏ hàng & Thanh toán</span>
+        </nav>
+
+        <!-- Step Pill -->
+        <div class="flex items-center gap-2 text-xs font-label">
+          <span class="px-3 py-1 rounded-full bg-oishi-red text-white font-bold flex items-center gap-1 shadow-xs">
+            <span>1</span>
+            <span>Giỏ hàng</span>
+          </span>
+          <span class="text-oishi-muted">→</span>
+          <span class="px-3 py-1 rounded-full bg-white text-oishi-choco border border-oishi-border flex items-center gap-1">
+            <span>2</span>
+            <span>Giao nhận & TT</span>
+          </span>
+          <span class="text-oishi-muted">→</span>
+          <span class="px-3 py-1 rounded-full bg-white text-oishi-muted border border-oishi-border">
+            <span>3</span>
+            <span>Hoàn tất</span>
+          </span>
+        </div>
+      </div>
+
+      <h1 class="rainbow font-display text-2xl md:text-3xl mb-gutter-md">Giỏ Hàng Bánh Snack Oishi</h1>
+
+      <!-- Layout 2 cột: Bảng giỏ hàng & Thanh toán -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start">
+
+        <!-- Cột trái (7 cols): Danh sách sản phẩm & Thông tin người nhận -->
+        <div class="lg:col-span-7 flex flex-col gap-gutter-md">
+
+          <!-- Bảng danh sách sản phẩm trong giỏ -->
+          <div class="panel rounded-xl shadow-md p-gutter-md md:p-gutter-lg" style="--accent:#ff9bb5">
+            <div class="flex items-center justify-between border-b-2 border-oishi-border pb-3 mb-3">
+              <h2 class="font-display text-lg text-oishi-red flex items-center gap-2">
+                <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                <span>Sản phẩm đã chọn (<span id="cart-item-count">0</span>)</span>
+              </h2>
+              <button id="btn-clear-all" type="button" class="text-xs font-label text-oishi-muted hover:text-oishi-red flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-sm">delete_sweep</span>
+                <span>Xóa tất cả</span>
+              </button>
+            </div>
+
+            <!-- Container danh sách item -->
+            <div id="cart-table-container" class="flex flex-col gap-3"></div>
+
+            <!-- Nếu giỏ trống -->
+            <div id="cart-empty-state" class="hidden flex-col items-center justify-center py-12 text-center gap-3">
+              <span class="material-symbols-outlined text-5xl text-oishi-border">production_quantity_limits</span>
+              <h3 class="font-display text-xl text-oishi-choco">Giỏ hàng của bạn đang trống</h3>
+              <p class="font-body text-sm text-oishi-muted max-w-sm">Chưa có gói bánh Oishi nào được chọn. Hãy ghé trang sản phẩm để chọn những vị snack giòn tan yêu thích nhé!</p>
+              <a href="index.html#san-pham" class="btn-cute inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-oishi-red text-white font-label text-sm mt-2">
+                <span class="material-symbols-outlined text-base">shopping_bag</span>
+                <span>Khám phá sản phẩm Oishi</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Thông tin giao hàng (Form) -->
+          <div id="shipping-form-panel" class="panel rounded-xl shadow-md p-gutter-md md:p-gutter-lg" style="--accent:#7cc4f5">
+            <h2 class="font-display text-lg text-oishi-red flex items-center gap-2 border-b-2 border-oishi-border pb-3 mb-4">
+              <span class="material-symbols-outlined text-xl">local_shipping</span>
+              <span>Thông tin nhận hàng</span>
+            </h2>
+
+            <form id="order-form" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-label">
+              <div class="flex flex-col gap-1">
+                <label for="cust-name" class="text-xs font-bold text-oishi-choco">Họ và tên người nhận <span class="text-oishi-red">*</span></label>
+                <input id="cust-name" type="text" required placeholder="Ví dụ: Nguyễn Văn An" class="rounded-md border-2 border-oishi-border bg-white px-3 py-2 text-sm focus:border-oishi-red focus:ring-0">
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label for="cust-phone" class="text-xs font-bold text-oishi-choco">Số điện thoại <span class="text-oishi-red">*</span></label>
+                <input id="cust-phone" type="tel" required placeholder="Ví dụ: 0912 345 678" class="rounded-md border-2 border-oishi-border bg-white px-3 py-2 text-sm focus:border-oishi-red focus:ring-0">
+              </div>
+
+              <div class="sm:col-span-2 flex flex-col gap-1">
+                <label for="cust-address" class="text-xs font-bold text-oishi-choco">Địa chỉ giao hàng (Số nhà, tên đường, phường/xã) <span class="text-oishi-red">*</span></label>
+                <input id="cust-address" type="text" required placeholder="Ví dụ: 123 Đường Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh" class="rounded-md border-2 border-oishi-border bg-white px-3 py-2 text-sm focus:border-oishi-red focus:ring-0">
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label for="shipping-method" class="text-xs font-bold text-oishi-choco">Phương thức vận chuyển</label>
+                <select id="shipping-method" class="rounded-md border-2 border-oishi-border bg-white px-3 py-2 text-sm focus:border-oishi-red focus:ring-0">
+                  <option value="standard" selected>Giao tiêu chuẩn (1-2 ngày) - 15.000₫</option>
+                  <option value="express">Giao hỏa tốc 2 Giờ - 30.000₫</option>
+                </select>
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label for="cust-note" class="text-xs font-bold text-oishi-choco">Ghi chú giao hàng (nếu có)</label>
+                <input id="cust-note" type="text" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao" class="rounded-md border-2 border-oishi-border bg-white px-3 py-2 text-sm focus:border-oishi-red focus:ring-0">
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Cột phải (5 cols): Tóm tắt đơn, Voucher, Phương thức TT & Đặt hàng -->
+        <div class="lg:col-span-5 flex flex-col gap-gutter-md sticky top-20">
+
+          <!-- Voucher Code Box -->
+          <div class="panel rounded-xl shadow-md p-gutter-md" style="--accent:#ffc94d">
+            <h3 class="font-display text-base text-oishi-red flex items-center gap-1.5 mb-2">
+              <span class="material-symbols-outlined text-lg">local_offer</span>
+              <span>Mã giảm giá Oishi</span>
+            </h3>
+            <div class="flex gap-2">
+              <input id="voucher-input" type="text" placeholder="Nhập mã (VD: OISHIVUI)" class="flex-1 uppercase rounded-md border-2 border-oishi-border bg-white px-3 py-1.5 text-xs font-mono font-bold focus:border-oishi-red focus:ring-0">
+              <button id="btn-apply-voucher" type="button" class="px-4 py-1.5 rounded-md bg-oishi-red text-white font-label text-xs font-bold hover:bg-oishi-red-deep transition-colors">
+                Áp dụng
+              </button>
+            </div>
+            <!-- Quick Chips -->
+            <div class="flex flex-wrap gap-1.5 mt-2.5 text-2xs font-label">
+              <button type="button" data-voucher="OISHIVUI" class="voucher-chip px-2.5 py-1 rounded-full bg-white border border-oishi-border hover:border-oishi-pink text-oishi-choco transition-colors">
+                🏷️ OISHIVUI (-10k)
+              </button>
+              <button type="button" data-voucher="FREESHIP" class="voucher-chip px-2.5 py-1 rounded-full bg-white border border-oishi-border hover:border-oishi-pink text-oishi-choco transition-colors">
+                🚚 FREESHIP (Miễn ship)
+              </button>
+              <button type="button" data-voucher="SNACK15" class="voucher-chip px-2.5 py-1 rounded-full bg-white border border-oishi-border hover:border-oishi-pink text-oishi-choco transition-colors">
+                ✨ SNACK15 (-15%)
+              </button>
+            </div>
+            <p id="voucher-status" class="hidden text-xs mt-2 font-label"></p>
+          </div>
+
+          <!-- Tóm tắt chi phí -->
+          <div class="panel rounded-xl shadow-md p-gutter-md" style="--accent:#ffab6b">
+            <h3 class="font-display text-base text-oishi-choco border-b border-oishi-border pb-2 mb-3">Tóm tắt đơn hàng</h3>
+            <div class="flex flex-col gap-2 font-label text-sm">
+              <div class="flex justify-between">
+                <span class="text-oishi-muted">Tiền hàng tạm tính:</span>
+                <span id="summary-subtotal" class="font-bold text-oishi-choco tabular-nums">0₫</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-oishi-muted">Phí vận chuyển:</span>
+                <span id="summary-shipping" class="font-bold text-oishi-choco tabular-nums">15.000₫</span>
+              </div>
+              <div id="summary-discount-row" class="hidden flex justify-between text-oishi-success">
+                <span>Giảm giá Voucher:</span>
+                <span id="summary-discount" class="font-bold tabular-nums">-0₫</span>
+              </div>
+              <div class="flex justify-between items-baseline pt-2 border-t-2 border-dashed border-oishi-border mt-1">
+                <span class="font-display text-base text-oishi-choco">Tổng thanh toán:</span>
+                <span id="summary-total" class="font-display text-2xl text-oishi-red tabular-nums">0₫</span>
+              </div>
+            </div>
+
+            <!-- Phương thức thanh toán -->
+            <div class="mt-4 pt-3 border-t border-oishi-border flex flex-col gap-2">
+              <label class="text-xs font-bold text-oishi-choco uppercase tracking-wider">Phương thức thanh toán:</label>
+              <div class="flex flex-col gap-1.5 text-xs font-label">
+                <label class="flex items-center gap-2 p-2 rounded-md bg-white border border-oishi-border cursor-pointer hover:border-oishi-red transition-colors">
+                  <input type="radio" name="payment_method" value="cod" checked class="text-oishi-red focus:ring-oishi-red">
+                  <span class="material-symbols-outlined text-oishi-orange text-base">payments</span>
+                  <span class="font-bold">Thanh toán khi nhận hàng (COD)</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-md bg-white border border-oishi-border cursor-pointer hover:border-oishi-red transition-colors">
+                  <input type="radio" name="payment_method" value="vietqr" class="text-oishi-red focus:ring-oishi-red">
+                  <span class="material-symbols-outlined text-oishi-red text-base">qr_code_2</span>
+                  <span class="font-bold">Chuyển khoản VietQR (Quét mã nhanh)</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-md bg-white border border-oishi-border cursor-pointer hover:border-oishi-red transition-colors">
+                  <input type="radio" name="payment_method" value="momo" class="text-oishi-red focus:ring-oishi-red">
+                  <span class="material-symbols-outlined text-oishi-pink text-base">account_balance_wallet</span>
+                  <span class="font-bold">Ví MoMo / ZaloPay</span>
+                </label>
+              </div>
+
+              <!-- VietQR Preview Box (nếu chọn) -->
+              <div id="vietqr-box" class="hidden p-3 rounded-md bg-white border-2 border-oishi-red flex flex-col items-center text-center gap-2 mt-1">
+                <div class="font-bold text-xs text-oishi-red">Mã QR Thanh Toán Tự Động Oishi</div>
+                <div class="w-32 h-32 bg-oishi-cream border border-oishi-border rounded flex items-center justify-center p-1">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=OISHI-STORE-ORDER" alt="VietQR" class="w-full h-full object-contain">
+                </div>
+                <div class="text-2xs text-oishi-muted">Mở App ngân hàng quét mã để thanh toán tức thì</div>
+              </div>
+            </div>
+
+            <!-- Nút Đặt hàng -->
+            <button id="btn-submit-order" type="button" class="btn-cute w-full mt-4 py-3 px-4 rounded-full bg-oishi-red text-white font-label text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Xác nhận đặt bánh Oishi</span>
+            </button>
+            <p class="text-2xs text-center text-oishi-muted mt-2">Bằng việc đặt hàng, bạn đồng ý với Điều khoản mua sắm Oishi World Store.</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Modal Đặt Hàng Thành Công -->
+    <dialog id="success-modal" class="rounded-2xl p-0 bg-transparent backdrop:bg-oishi-footer/60 max-w-md w-full m-auto">
+      <div class="panel rounded-2xl bg-white p-6 shadow-2xl flex flex-col items-center text-center gap-3 border-4 border-oishi-red" style="--accent:#7bd89b">
+        <div class="w-16 h-16 rounded-full bg-oishi-success/15 text-oishi-success flex items-center justify-center animate-bounce">
+          <span class="material-symbols-outlined text-4xl">celebration</span>
+        </div>
+
+        <h3 class="rainbow font-display text-2xl text-oishi-red">Đặt Hàng Thành Công!</h3>
+        <p class="font-body text-sm text-oishi-choco">
+          Cảm ơn bạn đã đặt bánh tại <strong class="text-oishi-red">Oishi World Store</strong>. Chúng tôi đã nhận đơn và sẽ nướng phồng giòn rụm giao đến bạn ngay!
+        </p>
+
+        <!-- Thông tin mã đơn -->
+        <div class="w-full p-3 rounded-lg bg-oishi-cream border border-oishi-border text-xs font-mono text-left flex flex-col gap-1.5 my-1">
+          <div class="flex justify-between">
+            <span class="text-oishi-muted font-label">Mã đơn hàng:</span>
+            <strong id="modal-order-id" class="text-oishi-red">OS-202611-9842</strong>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-oishi-muted font-label">Người nhận:</span>
+            <span id="modal-cust-name" class="font-bold text-oishi-choco">Nguyễn Văn An</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-oishi-muted font-label">Tổng thanh toán:</span>
+            <strong id="modal-total-amt" class="text-oishi-red font-bold">45.000₫</strong>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-oishi-muted font-label">Thanh toán:</span>
+            <span id="modal-pay-method" class="font-label">Tiền mặt (COD)</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2 w-full mt-2">
+          <a href="index.html" class="btn-cute flex-1 py-2.5 px-4 rounded-full bg-oishi-red text-white font-label text-sm text-center font-bold">
+            Trở về Trang chủ
+          </a>
+          <a href="product-detail.html" class="btn-cute flex-1 py-2.5 px-4 rounded-full bg-white text-oishi-choco border-2 border-oishi-border font-label text-sm text-center font-bold">
+            Xem thêm 3D
+          </a>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Footer -->
+    <div class="scallop mt-auto" aria-hidden="true"></div>
+    <footer class="bg-oishi-footer text-white pb-12">
+      <div class="max-w-6xl mx-auto px-page-margin py-section">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter-xl pb-gutter-xl border-b border-white/15 items-start">
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <div class="inline-flex items-center bg-white px-2.5 py-1 rounded-md w-fit">
+              <img src="imgs/logo-transparent.png" alt="Logo Oishi" class="h-8 w-auto object-contain">
+            </div>
+            <p class="font-body text-body-md text-white/75">
+              Thế giới bánh snack chính hãng Oishi Việt Nam. Giòn tan từng miếng, vui trọn ngày dài.
+            </p>
+          </div>
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <h3 class="font-label text-label-lg text-white">ĐIỀU HƯỚNG</h3>
+            <ul class="flex flex-col gap-gutter-xs font-body text-body-md text-white/75">
+              <li><a href="index.html" class="hover:text-white">Trang chủ Oishi</a></li>
+              <li><a href="index.html#san-pham" class="hover:text-white">Danh sách bánh snack</a></li>
+              <li><a href="product-detail.html" class="hover:text-white">Xem mô hình 3D xoay 360°</a></li>
+              <li><a href="cart.html" class="hover:text-white">Giỏ hàng & Thanh toán</a></li>
+            </ul>
+          </div>
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <h3 class="font-label text-label-lg text-white">HƯƠNG VỊ BÁN CHẠY</h3>
+            <ul class="flex flex-col gap-gutter-xs font-body text-body-md text-white/75">
+              <li><a href="product-detail.html?id=tom-cay" class="hover:text-white">Snack Tôm Cay</a></li>
+              <li><a href="product-detail.html?id=bap-pho-mai" class="hover:text-white">Snack Bắp Phô Mai</a></li>
+              <li><a href="product-detail.html?id=crab-me" class="hover:text-white">Crab Me! Snack Cua</a></li>
+              <li><a href="product-detail.html?id=martys-chay" class="hover:text-white">Marty's Da Heo Chay</a></li>
+            </ul>
+          </div>
+          <div class="md:col-span-3 flex flex-col gap-gutter-sm">
+            <h3 class="font-label text-label-lg text-white">LIÊN HỆ & CSKH</h3>
+            <ul class="flex flex-col gap-gutter-xs font-body text-body-md text-white/75">
+              <li class="tabular-nums">Hotline: 1900 636 888</li>
+              <li>Email: cskh@oishisnack.vn</li>
+              <li>TP. Hồ Chí Minh, Việt Nam</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pt-gutter-lg flex flex-col sm:flex-row items-center justify-between gap-gutter-sm font-body text-xs text-white/60">
+          <span>© 2026 Oishi World Store. Tất cả các quyền được bảo lưu.</span>
+          <span>Sản phẩm chính hãng Oishi Liwayway Vietnam.</span>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /#page -->
+
+  <script src="products-data.js"></script>
+  <script>
+    (function () {
+      let appliedVoucher = null;
+      let shippingFee = 15000;
+
+      // DOM Elements
+      const cartTableContainer = document.getElementById('cart-table-container');
+      const cartEmptyState = document.getElementById('cart-empty-state');
+      const shippingFormPanel = document.getElementById('shipping-form-panel');
+      const cartItemCount = document.getElementById('cart-item-count');
+      const btnClearAll = document.getElementById('btn-clear-all');
+      const summarySubtotal = document.getElementById('summary-subtotal');
+      const summaryShipping = document.getElementById('summary-shipping');
+      const summaryDiscountRow = document.getElementById('summary-discount-row');
+      const summaryDiscount = document.getElementById('summary-discount');
+      const summaryTotal = document.getElementById('summary-total');
+      const shippingSelect = document.getElementById('shipping-method');
+      const voucherInput = document.getElementById('voucher-input');
+      const btnApplyVoucher = document.getElementById('btn-apply-voucher');
+      const voucherStatus = document.getElementById('voucher-status');
+      const btnSubmitOrder = document.getElementById('btn-submit-order');
+      const orderForm = document.getElementById('order-form');
+      const successModal = document.getElementById('success-modal');
+      const vietqrBox = document.getElementById('vietqr-box');
+
+      function calculateTotals() {
+        const subtotal = OishiCart.getTotalPrice();
+        const count = OishiCart.getTotalCount();
+
+        // Cập nhật phí ship
+        if (shippingSelect.value === 'express') {
+          shippingFee = 30000;
+        } else {
+          // Freeship cho đơn từ 50.000đ trở lên
+          shippingFee = subtotal >= 50000 ? 0 : 15000;
+        }
+
+        // Tính giảm giá voucher
+        let discountAmt = 0;
+        if (appliedVoucher === 'OISHIVUI') {
+          discountAmt = Math.min(10000, subtotal);
+        } else if (appliedVoucher === 'FREESHIP') {
+          discountAmt = shippingFee;
+        } else if (appliedVoucher === 'SNACK15') {
+          discountAmt = Math.round(subtotal * 0.15);
+        }
+
+        const grandTotal = Math.max(0, subtotal + shippingFee - discountAmt);
+
+        summarySubtotal.textContent = OishiCart.formatVND(subtotal);
+        summaryShipping.textContent = shippingFee === 0 ? 'Miễn phí (Freeship)' : OishiCart.formatVND(shippingFee);
+
+        if (discountAmt > 0) {
+          summaryDiscountRow.classList.remove('hidden');
+          summaryDiscount.textContent = '-' + OishiCart.formatVND(discountAmt);
+        } else {
+          summaryDiscountRow.classList.add('hidden');
+        }
+
+        summaryTotal.textContent = OishiCart.formatVND(grandTotal);
+        btnSubmitOrder.disabled = count === 0;
+
+        return { subtotal, shippingFee, discountAmt, grandTotal };
+      }
+
+      function renderCartTable() {
+        const items = OishiCart.getCart();
+        const count = OishiCart.getTotalCount();
+        cartItemCount.textContent = String(count);
+
+        if (items.length === 0) {
+          cartTableContainer.innerHTML = '';
+          cartEmptyState.classList.remove('hidden');
+          cartEmptyState.classList.add('flex');
+          btnClearAll.classList.add('hidden');
+          shippingFormPanel.classList.add('opacity-50', 'pointer-events-none');
+          calculateTotals();
+          return;
+        }
+
+        cartEmptyState.classList.add('hidden');
+        cartEmptyState.classList.remove('flex');
+        btnClearAll.classList.remove('hidden');
+        shippingFormPanel.classList.remove('opacity-50', 'pointer-events-none');
+
+        cartTableContainer.innerHTML = items.map(item => `
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-white border-2 border-oishi-border hover:border-oishi-red transition-colors shadow-xs">
+            <a href="product-detail.html?id=${item.id.split('-')[0]}" class="shrink-0 group">
+              <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain rounded-md bg-white p-1 img-blend-darken group-hover:scale-105 transition-transform">
+            </a>
+            <div class="flex-1 min-w-0">
+              <a href="product-detail.html?id=${item.id.split('-')[0]}" class="font-title text-sm text-oishi-choco hover:text-oishi-red transition-colors block truncate">
+                ${item.name}
+              </a>
+              <span class="text-xs text-oishi-muted font-label">${item.weight || 'Gói tiêu chuẩn'}</span>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="font-label text-sm text-oishi-red font-bold tabular-nums">${OishiCart.formatVND(item.price)}</span>
+              </div>
+            </div>
+            <!-- Bộ tăng giảm số lượng -->
+            <div class="flex items-center rounded-full border border-oishi-border bg-oishi-cream overflow-hidden">
+              <button type="button" data-delta="-1" data-id="${item.id}" class="w-7 h-7 flex items-center justify-center font-bold text-oishi-choco hover:bg-oishi-kraft-light">-</button>
+              <span class="w-7 text-center font-label text-xs font-bold tabular-nums">${item.qty}</span>
+              <button type="button" data-delta="1" data-id="${item.id}" class="w-7 h-7 flex items-center justify-center font-bold text-oishi-choco hover:bg-oishi-kraft-light">+</button>
+            </div>
+            <!-- Thành tiền & Xóa -->
+            <div class="flex flex-col items-end gap-1 shrink-0 ml-1">
+              <span class="font-label text-sm font-bold text-oishi-choco tabular-nums">${OishiCart.formatVND(item.price * item.qty)}</span>
+              <button type="button" data-remove="${item.id}" title="Xóa món này" class="text-oishi-muted hover:text-oishi-red transition-colors">
+                <span class="material-symbols-outlined text-base">delete</span>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        calculateTotals();
+      }
+
+      // Xử lý sự kiện trong bảng giỏ hàng
+      cartTableContainer.addEventListener('click', (e) => {
+        const deltaBtn = e.target.closest('[data-delta]');
+        if (deltaBtn) {
+          const id = deltaBtn.getAttribute('data-id');
+          const delta = parseInt(deltaBtn.getAttribute('data-delta'), 10);
+          OishiCart.updateQty(id, delta);
+          renderCartTable();
+          return;
+        }
+
+        const removeBtn = e.target.closest('[data-remove]');
+        if (removeBtn) {
+          const id = removeBtn.getAttribute('data-remove');
+          OishiCart.removeItem(id);
+          renderCartTable();
+        }
+      });
+
+      btnClearAll.addEventListener('click', () => {
+        if (confirm('Bạn có chắc muốn xóa tất cả sản phẩm khỏi giỏ hàng?')) {
+          OishiCart.clearCart();
+          renderCartTable();
+        }
+      });
+
+      shippingSelect.addEventListener('change', calculateTotals);
+
+      // Voucher logic
+      function applyVoucherCode(code) {
+        code = (code || '').trim().toUpperCase();
+        if (!code) return;
+
+        if (code === 'OISHIVUI') {
+          appliedVoucher = code;
+          voucherStatus.textContent = '✓ Đã áp dụng mã OISHIVUI: Giảm 10.000₫ vào đơn hàng!';
+          voucherStatus.className = 'text-xs mt-2 font-label text-oishi-success';
+        } else if (code === 'FREESHIP') {
+          appliedVoucher = code;
+          voucherStatus.textContent = '✓ Đã áp dụng mã FREESHIP: Miễn toàn bộ phí vận chuyển!';
+          voucherStatus.className = 'text-xs mt-2 font-label text-oishi-success';
+        } else if (code === 'SNACK15') {
+          appliedVoucher = code;
+          voucherStatus.textContent = '✓ Đã áp dụng mã SNACK15: Giảm ngay 15% tổng giá trị bánh!';
+          voucherStatus.className = 'text-xs mt-2 font-label text-oishi-success';
+        } else {
+          appliedVoucher = null;
+          voucherStatus.textContent = '✗ Mã giảm giá không hợp lệ hoặc đã hết lượt!';
+          voucherStatus.className = 'text-xs mt-2 font-label text-oishi-red';
+        }
+        voucherStatus.classList.remove('hidden');
+        calculateTotals();
+      }
+
+      btnApplyVoucher.addEventListener('click', () => applyVoucherCode(voucherInput.value));
+      document.querySelectorAll('.voucher-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const v = chip.getAttribute('data-voucher');
+          voucherInput.value = v;
+          applyVoucherCode(v);
+        });
+      });
+
+      // Payment method change (hiện VietQR nếu chọn)
+      document.querySelectorAll('input[name="payment_method"]').forEach(r => {
+        r.addEventListener('change', () => {
+          vietqrBox.classList.toggle('hidden', r.value !== 'vietqr');
+        });
+      });
+
+      // Submit đặt hàng
+      btnSubmitOrder.addEventListener('click', () => {
+        const name = document.getElementById('cust-name').value.trim();
+        const phone = document.getElementById('cust-phone').value.trim();
+        const address = document.getElementById('cust-address').value.trim();
+
+        if (!name || !phone || !address) {
+          alert('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ nhận hàng nhé!');
+          if (!name) document.getElementById('cust-name').focus();
+          else if (!phone) document.getElementById('cust-phone').focus();
+          else document.getElementById('cust-address').focus();
+          return;
+        }
+
+        const totals = calculateTotals();
+        const randomId = 'OS-' + new Date().getFullYear() + String(new Date().getMonth()+1).padStart(2,'0') + '-' + Math.floor(1000 + Math.random() * 9000);
+        const payMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        const payMethodNames = {
+          cod: 'Thanh toán khi nhận hàng (COD)',
+          vietqr: 'Chuyển khoản VietQR',
+          momo: 'Ví MoMo / ZaloPay'
+        };
+
+        // Điền modal thành công
+        document.getElementById('modal-order-id').textContent = randomId;
+        document.getElementById('modal-cust-name').textContent = name + ' (' + phone + ')';
+        document.getElementById('modal-total-amt').textContent = OishiCart.formatVND(totals.grandTotal);
+        document.getElementById('modal-pay-method').textContent = payMethodNames[payMethod] || 'COD';
+
+        // Xóa giỏ hàng
+        OishiCart.clearCart();
+        renderCartTable();
+
+        // Mở modal
+        if (typeof successModal.showModal === 'function') {
+          successModal.showModal();
+        }
+      });
+
+      // Khởi tạo
+      renderCartTable();
+
+      // Mây trôi nền trời
+      const NS = 'http://www.w3.org/2000/svg';
+      const CLOUD_DEFS = [
+        [6, -6, 28, '#ffffff', '#7cc4f5', 15],
+        [15, 68, 24, '#fff1f5', '#ff9bb5', 18],
+        [50, -8, 22, '#fff8d6', '#ffc94d', 13],
+        [75, 75, 26, '#e9f9ee', '#7bd89b', 16]
+      ];
+      function cloudSVG(fill, stroke) {
+        const C = [[50,95,38],[105,70,50],[170,60,58],[235,78,46],[275,100,32],[150,105,60]];
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', '0 0 310 170');
+        const g = r => C.map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="${c[2]+r}"/>`).join('') +
+          `<rect x="${50-r}" y="${100-r}" width="${225+2*r}" height="${50+2*r}" rx="25"/>`;
+        svg.innerHTML = `
+          <g fill="${stroke}">${g(8)}</g>
+          <g fill="${fill}">${g(0)}</g>
+          <g stroke="${stroke}" stroke-width="5" stroke-linecap="round" opacity=".5" fill="none">
+            <path d="M70 120 l22 -26"/><path d="M95 130 l26 -30"/><path d="M130 135 l26 -32"/>
+          </g>`;
+        return svg;
+      }
+      const sky = document.getElementById('sky');
+      CLOUD_DEFS.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'cloud';
+        el.style.cssText = `top:${d[0]}%;left:${d[1]}%;width:${d[2]}vw;`;
+        const inner = document.createElement('div');
+        inner.className = 'drift';
+        inner.style.setProperty('--dur', d[5] + 's');
+        inner.appendChild(cloudSVG(d[3], d[4]));
+        el.appendChild(inner);
+        sky.appendChild(el);
+      });
+
+      // Rainbow text
+      const COLORS = ['#ff4d6d', '#ff9f1c', '#2ec4b6', '#7b5cff', '#ff6f91', '#3a86ff', '#8ac926'];
+      let ci = 0;
+      document.querySelectorAll('.rainbow').forEach(el => {
+        const text = el.textContent.trim().replace(/\s+/g, ' ');
+        el.setAttribute('aria-label', text);
+        el.textContent = '';
+        const wrap = document.createElement('span');
+        wrap.setAttribute('aria-hidden', 'true');
+        text.split(' ').forEach((word, wi, arr) => {
+          const w = document.createElement('span');
+          w.className = 'word';
+          Array.from(word).forEach(ch => {
+            const s = document.createElement('span');
+            s.className = 'ch';
+            s.textContent = ch;
+            s.style.setProperty('--c', COLORS[ci % COLORS.length]);
+            s.style.setProperty('--i', ci);
+            s.style.setProperty('--r', (ci % 2 ? 2 : -2) + 'deg');
+            ci++;
+            w.appendChild(s);
+          });
+          wrap.appendChild(w);
+          if (wi < arr.length - 1) wrap.appendChild(document.createTextNode(' '));
+        });
+        el.appendChild(wrap);
+      });
+    })();
+  </script>
+</body>
+</html>
